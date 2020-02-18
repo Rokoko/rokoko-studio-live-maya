@@ -1,10 +1,11 @@
 #include "button.h"
 #include <QPainter>
+#include <iostream>
 
 
 Button::Button(QWidget *parent, ButtonParams params)
     : QPushButton(parent),
-      mShouldDrawIcon(false),
+      mShouldDrawIcon(true),
       mParams(params)
 {
     setText(params.uncheckedStateText);

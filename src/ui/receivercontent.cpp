@@ -1,5 +1,6 @@
 #include "receivercontent.h"
 #include "ui/button.h"
+#include "ui/recordbutton.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -58,7 +59,11 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
 
     Button* startReceiverBtn = new Button(this, receiverBtnParams);
     startReceiverBtn->setCheckable(true);
-    startReceiverBtn->setDrawIcon(true);
     mainLayout->addWidget(startReceiverBtn);
 
+    // record button
+    RecordButton* startRecordingBtn = new RecordButton(this);
+    startRecordingBtn->setEnabled(false);
+    mainLayout->addWidget(startRecordingBtn);
+    connect(startReceiverBtn, &QPushButton::toggled, startRecordingBtn, &QPushButton::setEnabled);
 }

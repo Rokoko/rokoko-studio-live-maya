@@ -5,5 +5,7 @@
         <file>resources/icon-studio-live-32.png</file>
         <file>resources/pause.svg</file>
         <file>resources/play.svg</file>
+        <file>resources/icon-record-32.png</file>
+        <file>resources/icon-stop-white-32.png</file>
     </qresource>
 </RCC>
