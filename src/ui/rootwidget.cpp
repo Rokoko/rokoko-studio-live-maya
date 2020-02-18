@@ -6,6 +6,7 @@
 #include "ui/rootwidget.h"
 #include "ui/categoryheader.h"
 #include "ui/infocontent.h"
+#include "ui/receivercontent.h"
 
 
 #include <QVBoxLayout>
@@ -33,9 +34,13 @@ RootWidget::RootWidget(QWidget *parent)
     mainLayout->setSpacing(1);
 
     // Rokoko studio live category
-    CategoryHeader* rslHeader = new CategoryHeader(this, "Rokoko Studio Live");
-    // TODO: implement content
-    mainLayout->addWidget(rslHeader, 0, Qt::AlignTop);
+    CategoryHeader* receiverHeader = new CategoryHeader(this, "Rokoko Studio Live");
+    mainLayout->addWidget(receiverHeader, 0, Qt::AlignTop);
+    ReceiverContent* receiverContent = new ReceiverContent(this);
+    mainLayout->addWidget(receiverContent, 0, Qt::AlignTop);
+    connect(receiverHeader, &CategoryHeader::collapseStateChanged, [receiverContent](bool bCollapsed) {
+        receiverContent->setVisible(!bCollapsed);
+    });
 
     // Command API category
     CategoryHeader* commandAPIHeader = new CategoryHeader(this, "Studio Command API");

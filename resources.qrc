@@ -3,5 +3,7 @@
         <file>resources/arrow.svg</file>
         <file>resources/style.qss</file>
         <file>resources/icon-studio-live-32.png</file>
+        <file>resources/pause.svg</file>
+        <file>resources/play.svg</file>
     </qresource>
 </RCC>

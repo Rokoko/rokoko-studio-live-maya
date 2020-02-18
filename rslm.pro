@@ -29,14 +29,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     src/main.cpp \
+    src/ui/button.cpp \
     src/ui/categoryheader.cpp \
     src/ui/infocontent.cpp \
+    src/ui/receivercontent.cpp \
     src/ui/rootwidget.cpp
 
 HEADERS += \
     src/constants.h \
+    src/ui/button.h \
     src/ui/categoryheader.h \
     src/ui/infocontent.h \
+    src/ui/receivercontent.h \
     src/ui/rootwidget.h
 
 INCLUDEPATH += "$$PWD/src"
