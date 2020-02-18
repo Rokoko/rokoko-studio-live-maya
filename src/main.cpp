@@ -1,4 +1,4 @@
-#include "rootwidget.h"
+#include "ui/rootwidget.h"
 #include "constants.h"
 
 #include <QPointer>

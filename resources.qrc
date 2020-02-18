@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/arrow.svg</file>
+        <file>resources/style.qss</file>
+        <file>resources/icon-studio-live-32.png</file>
+    </qresource>
+</RCC>

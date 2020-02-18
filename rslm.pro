@@ -29,13 +29,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     src/main.cpp \
-    src/rootwidget.cpp
+    src/ui/categoryheader.cpp \
+    src/ui/infocontent.cpp \
+    src/ui/rootwidget.cpp
 
 HEADERS += \
-    include/constants.h \
-    include/rootwidget.h
+    src/constants.h \
+    src/ui/categoryheader.h \
+    src/ui/infocontent.h \
+    src/ui/rootwidget.h
 
-INCLUDEPATH += "$$PWD/include"
+INCLUDEPATH += "$$PWD/src"
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -43,3 +47,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES +=
+
+RESOURCES += \
+    resources.qrc
