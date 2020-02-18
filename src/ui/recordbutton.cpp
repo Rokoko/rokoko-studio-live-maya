@@ -24,5 +24,6 @@ void RecordButton::changeEvent(QEvent* e)
         if(!isEnabled()) {
             setChecked(false);
         }
+        update();
     }
 }

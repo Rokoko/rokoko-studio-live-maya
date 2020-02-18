@@ -2,7 +2,7 @@
 #include "constants.h"
 
 #include <QPointer>
-#include <QVBoxLayout>
+#include <QScrollArea>
 
 #include <maya/MFnPlugin.h>
 #include <maya/MGlobal.h>
@@ -10,6 +10,7 @@
 #include <maya/MQtUtil.h>
 #include <maya/MTimerMessage.h>
 
+QPointer<QScrollArea> rsmlScrollArea;
 QPointer<RootWidget> rsmlWidget;
 QPointer<QWidget> workspaceControl;
 
@@ -23,7 +24,11 @@ MStatus initializePlugin(MObject) {
     cmd.format("workspaceControl -l \"^1s\" -fl true ^2s \"RSMLControl\"", WORKEPACE_CONTROL_NAME, sizeArgs);
     MGlobal::executeCommand(cmd);
     workspaceControl = MQtUtil::findControl("RSMLControl");
+    rsmlScrollArea = new QScrollArea(workspaceControl);
     rsmlWidget = new RootWidget(workspaceControl);
+    rsmlScrollArea->setWidget(rsmlWidget);
+    rsmlScrollArea->setWidgetResizable(true);
+    MQtUtil::addWidgetToMayaLayout(rsmlScrollArea, workspaceControl);
     return result;
 }
 
@@ -40,6 +45,10 @@ MStatus uninitializePlugin(MObject plugin)
 
     if(!rsmlWidget.isNull()) {
         rsmlWidget.clear();
+    }
+
+    if(!rsmlScrollArea.isNull()) {
+        rsmlScrollArea.clear();
     }
 
     return result;

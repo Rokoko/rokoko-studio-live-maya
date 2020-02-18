@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include <maya/MGlobal.h>
-#include <maya/MQtUtil.h>
 
 #include "ui/rootwidget.h"
 #include "ui/categoryheader.h"
@@ -20,7 +19,6 @@
 RootWidget::RootWidget(QWidget *parent)
     : QWidget(parent)
 {
-
     // apply style
     QFile styleFile(":/resources/style.qss");
     if(styleFile.open(QIODevice::ReadOnly)) {
@@ -28,7 +26,6 @@ RootWidget::RootWidget(QWidget *parent)
         setStyleSheet(styleString);
     }
 
-    MQtUtil::addWidgetToMayaLayout(this, parent);
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(1, 1, 1, 1);
     mainLayout->setSpacing(1);
