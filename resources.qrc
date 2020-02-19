@@ -9,5 +9,7 @@
         <file>resources/icon-stop-white-32.png</file>
         <file>resources/icon-restart-32.png</file>
         <file>resources/icon-straight-pose-32.png</file>
+        <file>resources/update.svg</file>
+        <file>resources/paper.svg</file>
     </qresource>
 </RCC>

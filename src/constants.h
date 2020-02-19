@@ -8,4 +8,8 @@ static const int INITIAL_WINDOW_HEIGHT = 800;
 static const int MINIMUM_WINDOW_HEIGHT = 300;
 static const int DEFAULT_RS_PORT = 14053;
 
+static const int VERSION_MAJOR = 1;
+static const int VERSION_MINOR = 0;
+static const int VERSION_PATCH = 0;
+
 #endif // CONSTANTS_H

@@ -35,7 +35,8 @@ SOURCES += \
     src/ui/infocontent.cpp \
     src/ui/receivercontent.cpp \
     src/ui/recordbutton.cpp \
-    src/ui/rootwidget.cpp
+    src/ui/rootwidget.cpp \
+    src/ui/updatercontent.cpp
 
 HEADERS += \
     src/constants.h \
@@ -45,7 +46,8 @@ HEADERS += \
     src/ui/infocontent.h \
     src/ui/receivercontent.h \
     src/ui/recordbutton.h \
-    src/ui/rootwidget.h
+    src/ui/rootwidget.h \
+    src/ui/updatercontent.h
 
 INCLUDEPATH += "$$PWD/src"
 

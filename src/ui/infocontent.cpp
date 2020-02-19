@@ -13,7 +13,8 @@ InfoContent::InfoContent(QWidget* parent) : QWidget(parent)
 {
     setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding));
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(5, 5, 5, 5);
+    mainLayout->setContentsMargins(1, 1, 1, 1);
+    mainLayout->setSpacing(1);
 
     QHBoxLayout* infoLayout = new QHBoxLayout(this);
 
@@ -29,6 +30,8 @@ InfoContent::InfoContent(QWidget* parent) : QWidget(parent)
     mainLayout->addLayout(infoLayout);
 
     QHBoxLayout* licenseWebsiteLayout = new QHBoxLayout(this);
+    licenseWebsiteLayout->setContentsMargins(0, 1, 0, 0);
+    licenseWebsiteLayout->setSpacing(1);
     mainLayout->addLayout(licenseWebsiteLayout);
 
     // license

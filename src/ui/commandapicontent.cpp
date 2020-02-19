@@ -19,6 +19,7 @@ CommandApiContent::CommandApiContent(QWidget* parent)
 
     // address
     QLineEdit* addrLineEdit = new QLineEdit("127.0.0.1", this);
+    addrLineEdit->setAlignment(Qt::AlignCenter);
     QString oIpRange = "(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])";
     QRegExp oIpRegex ("^" + oIpRange
                   + "\\." + oIpRange
@@ -31,6 +32,7 @@ CommandApiContent::CommandApiContent(QWidget* parent)
 
     // port
     QSpinBox* portBox = new QSpinBox(this);
+    portBox->setAlignment(Qt::AlignCenter);
     portBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     portBox->setMaximum(65535);
     portBox->setValue(DEFAULT_RS_PORT);
@@ -39,12 +41,15 @@ CommandApiContent::CommandApiContent(QWidget* parent)
 
     // key
     QLineEdit* keyLineEdit = new QLineEdit("1234", this);
+    keyLineEdit->setAlignment(Qt::AlignCenter);
     formLayout->addRow("Key:", keyLineEdit);
 
     mainLayout->addLayout(formLayout);
 
     // command buttons
     QHBoxLayout* commandsLayout = new QHBoxLayout(this);
+    commandsLayout->setContentsMargins(1, 1, 1, 1);
+    commandsLayout->setSpacing(1);
     // calibrate
     ButtonParams startCalibrationParams;
     startCalibrationParams.uncheckedStateText = "";

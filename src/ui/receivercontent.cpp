@@ -4,6 +4,7 @@
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QFormLayout>
 #include <QLabel>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
@@ -16,29 +17,28 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     mainLayout->setContentsMargins(1, 1, 1, 1);
     mainLayout->setSpacing(1);
 
+    QFormLayout* formLayout = new QFormLayout(this);
+    formLayout->setContentsMargins(1, 1, 1, 1);
+    formLayout->setSpacing(1);
+
     // port field
-    QHBoxLayout* portLayout = new QHBoxLayout(this);
-    QLabel* portLabel = new QLabel("Port:", this);
     QSpinBox* portBox = new QSpinBox(this);
+    portBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     portBox->setAlignment(Qt::AlignCenter);
     portBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
     portBox->setMaximum(65535);
     portBox->setValue(14043);
 
-    portLayout->addWidget(portLabel);
-    portLayout->addWidget(portBox);
-    mainLayout->addLayout(portLayout);
+    formLayout->addRow("Port:", portBox);
 
     // scene scale field
-    QHBoxLayout* sceneScaleLayout = new QHBoxLayout(this);
-    QLabel* sceneScaleLabel = new QLabel("Scene scale:", this);
     QDoubleSpinBox* sceneScaleBox = new QDoubleSpinBox(this);
+    sceneScaleBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     sceneScaleBox->setAlignment(Qt::AlignCenter);
     sceneScaleBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
     sceneScaleBox->setValue(1.0);
-    sceneScaleLayout->addWidget(sceneScaleLabel);
-    sceneScaleLayout->addWidget(sceneScaleBox);
-    mainLayout->addLayout(sceneScaleLayout);
+    formLayout->addRow("Scene scale:", sceneScaleBox);
+    mainLayout->addLayout(formLayout);
 
     // reset scene on stop option
     QCheckBox* cbResetSceneOnStop = new QCheckBox("Reset Scene on Stop", this);
