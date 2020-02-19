@@ -6,6 +6,7 @@
 #include "ui/categoryheader.h"
 #include "ui/infocontent.h"
 #include "ui/receivercontent.h"
+#include "ui/commandapicontent.h"
 
 
 #include <QVBoxLayout>
@@ -41,8 +42,12 @@ RootWidget::RootWidget(QWidget *parent)
 
     // Command API category
     CategoryHeader* commandAPIHeader = new CategoryHeader(this, "Studio Command API");
-    // TODO: implement content
     mainLayout->addWidget(commandAPIHeader, 0, Qt::AlignTop);
+    CommandApiContent* commandAPIContent = new CommandApiContent(this);
+    mainLayout->addWidget(commandAPIContent, 0, Qt::AlignTop);
+    connect(commandAPIHeader, &CategoryHeader::collapseStateChanged, [commandAPIContent](bool bCollapsed) {
+        commandAPIContent->setVisible(!bCollapsed);
+    });
 
     // Updater category
     CategoryHeader* updaterHeader = new CategoryHeader(this, "Updater");

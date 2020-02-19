@@ -31,6 +31,7 @@ SOURCES += \
     src/main.cpp \
     src/ui/button.cpp \
     src/ui/categoryheader.cpp \
+    src/ui/commandapicontent.cpp \
     src/ui/infocontent.cpp \
     src/ui/receivercontent.cpp \
     src/ui/recordbutton.cpp \
@@ -40,6 +41,7 @@ HEADERS += \
     src/constants.h \
     src/ui/button.h \
     src/ui/categoryheader.h \
+    src/ui/commandapicontent.h \
     src/ui/infocontent.h \
     src/ui/receivercontent.h \
     src/ui/recordbutton.h \
