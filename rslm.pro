@@ -29,6 +29,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     src/main.cpp \
+    src/receiverworker.cpp \
     src/ui/button.cpp \
     src/ui/categoryheader.cpp \
     src/ui/commandapicontent.cpp \
@@ -40,6 +41,8 @@ SOURCES += \
 
 HEADERS += \
     src/constants.h \
+    src/receiverworker.h \
+    src/singleton.h \
     src/ui/button.h \
     src/ui/categoryheader.h \
     src/ui/commandapicontent.h \

@@ -1,12 +1,15 @@
+#include <iostream>
+
 #include "receivercontent.h"
+#include "receiverworker.h"
 #include "ui/button.h"
 #include "ui/recordbutton.h"
 
+#include <QThread>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFormLayout>
 #include <QLabel>
-#include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QCheckBox>
 
@@ -22,7 +25,7 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     formLayout->setSpacing(1);
 
     // port field
-    QSpinBox* portBox = new QSpinBox(this);
+    portBox = new QSpinBox(this);
     portBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     portBox->setAlignment(Qt::AlignCenter);
     portBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
@@ -60,10 +63,50 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     Button* startReceiverBtn = new Button(this, receiverBtnParams);
     startReceiverBtn->setCheckable(true);
     mainLayout->addWidget(startReceiverBtn);
+    connect(startReceiverBtn, &Button::toggled, this, &ReceiverContent::onReceiveToggled);
 
     // record button
     RecordButton* startRecordingBtn = new RecordButton(this);
     startRecordingBtn->setEnabled(false);
     mainLayout->addWidget(startRecordingBtn);
     connect(startReceiverBtn, &QPushButton::toggled, startRecordingBtn, &QPushButton::setEnabled);
+
+    // test label
+    testLabel = new QLabel("...", this);
+    mainLayout->addWidget(testLabel);
+
+    // create worker and move it to thread
+    worker = new DataReceivingWorker(this);
+    listenerThread = new QThread(this);
+    listenerThread->setObjectName("RSListenerThread");
+    worker->moveToThread(listenerThread);
+    connect(worker, &DataReceivingWorker::frameReceived, [this](QJsonObject obj) {
+        QString t = QString("%1").arg(obj["playbackTimestamp"].toDouble());
+        testLabel->setText(t);
+    });
+    connect(worker, &DataReceivingWorker::onError, [this](QString err){
+        testLabel->setText(err);
+    });
+    listenerThread->start();
+}
+
+ReceiverContent::~ReceiverContent()
+{
+    worker->pause();
+    listenerThread->terminate();
+    listenerThread->wait();
+}
+
+void ReceiverContent::handleListenerError(QString err)
+{
+    testLabel->setText(err);
+}
+
+void ReceiverContent::onReceiveToggled(bool checked)
+{
+    if(checked) {
+        worker->start();
+    } else {
+        worker->pause();
+    }
 }
