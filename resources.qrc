@@ -11,5 +11,7 @@
         <file>resources/icon-straight-pose-32.png</file>
         <file>resources/update.svg</file>
         <file>resources/paper.svg</file>
+        <file>resources/icon-vp-32.png</file>
+        <file>resources/cube.png</file>
     </qresource>
 </RCC>

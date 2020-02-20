@@ -7,6 +7,7 @@
 #include <QUdpSocket>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QTimer>
 
 
 class DataReceivingWorker : public QObject
@@ -18,12 +19,16 @@ public slots:
     void start(int port=DEFAULT_RS_PORT);
     void pause();
 signals:
-    void onError(QString);
-    void frameReceived(QJsonObject);
+    void workerStateChanged(QString);
+    void onSocketConnected();
+
 private:
+    void processData(QJsonObject);
     void onSocketError(QAbstractSocket::SocketError);
     QUdpSocket* socket = nullptr;
     void readData();
+    QTimer hearbeat;
+    void onHearBeat();
 };
 
 #endif // RECEIVERWORKER_H

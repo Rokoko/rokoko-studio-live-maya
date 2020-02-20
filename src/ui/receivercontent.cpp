@@ -2,6 +2,7 @@
 
 #include "receivercontent.h"
 #include "receiverworker.h"
+#include "animations.h"
 #include "ui/button.h"
 #include "ui/recordbutton.h"
 
@@ -9,9 +10,13 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFormLayout>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 #include <QLabel>
 #include <QDoubleSpinBox>
 #include <QCheckBox>
+#include <QJsonArray>
+#include <QTimer>
 
 
 ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
@@ -71,42 +76,71 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     mainLayout->addWidget(startRecordingBtn);
     connect(startReceiverBtn, &QPushButton::toggled, startRecordingBtn, &QPushButton::setEnabled);
 
-    // test label
-    testLabel = new QLabel("...", this);
-    mainLayout->addWidget(testLabel);
+    // error label
+    statusLabel = new QLabel("", this);
+    mainLayout->addWidget(statusLabel);
+
+    // tree widget
+    treeWidget = new QTreeWidget(this);
+    treeWidget->headerItem()->setHidden(true);
+    treeWidget->setRootIsDecorated(false);
+    mainLayout->addWidget(treeWidget);
 
     // create worker and move it to thread
     worker = new DataReceivingWorker(this);
-    listenerThread = new QThread(this);
-    listenerThread->setObjectName("RSListenerThread");
-    worker->moveToThread(listenerThread);
-    connect(worker, &DataReceivingWorker::frameReceived, [this](QJsonObject obj) {
-        QString t = QString("%1").arg(obj["playbackTimestamp"].toDouble());
-        testLabel->setText(t);
+    connect(worker, &DataReceivingWorker::workerStateChanged, [&](QString status){
+        statusLabel->setText(status);
     });
-    connect(worker, &DataReceivingWorker::onError, [this](QString err){
-        testLabel->setText(err);
-    });
-    listenerThread->start();
+    connect(worker, &DataReceivingWorker::onSocketConnected, this, &ReceiverContent::populateTree);
 }
 
 ReceiverContent::~ReceiverContent()
 {
     worker->pause();
-    listenerThread->terminate();
-    listenerThread->wait();
 }
 
-void ReceiverContent::handleListenerError(QString err)
-{
-    testLabel->setText(err);
-}
 
 void ReceiverContent::onReceiveToggled(bool checked)
 {
-    if(checked) {
-        worker->start();
+    if(checked)
+    {
+        worker->start(portBox->value());
     } else {
         worker->pause();
+        clearTreeWidget();
+        statusLabel->setText("");
     }
 }
+
+void ReceiverContent::populateTree()
+{
+    QTimer::singleShot(500, [&](){
+        // populate props
+        auto props = Animations::getInstance()->getProps();
+        QHash<QString, QTreeWidgetItem*> propsItemMap;
+        foreach(auto prop, props) {
+            QTreeWidgetItem* propItem = new QTreeWidgetItem(treeWidget);
+            propItem->setText(0, prop["name"].toString());
+            propItem->setIcon(0, QIcon(":/resources/cube.png"));
+            propsItemMap[prop["id"].toString()] = propItem;
+        }
+
+        // populate trackers
+        auto trackers = Animations::getInstance()->getTrackers();
+        foreach(auto tracker, trackers) {
+            QTreeWidgetItem* parentItem = propsItemMap[tracker["connectionId"].toString()];
+            QTreeWidgetItem* trackerItem = new QTreeWidgetItem(parentItem);
+            trackerItem->setText(0, tracker["name"].toString());
+            trackerItem->setIcon(0, QIcon(":/resources/icon-vp-32.png"));
+        }
+
+        treeWidget->expandAll();
+        treeWidget->setItemsExpandable(false);
+    });
+}
+
+void ReceiverContent::clearTreeWidget()
+{
+    treeWidget->clear();
+}
+

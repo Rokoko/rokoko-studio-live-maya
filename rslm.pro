@@ -28,7 +28,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/animations.cpp \
     src/main.cpp \
+    src/mapping.cpp \
     src/receiverworker.cpp \
     src/ui/button.cpp \
     src/ui/categoryheader.cpp \
@@ -37,10 +39,14 @@ SOURCES += \
     src/ui/receivercontent.cpp \
     src/ui/recordbutton.cpp \
     src/ui/rootwidget.cpp \
-    src/ui/updatercontent.cpp
+    src/ui/updatercontent.cpp \
+    src/utils.cpp
 
 HEADERS += \
+    src/animations.h \
     src/constants.h \
+    src/interfaces.h \
+    src/mapping.h \
     src/receiverworker.h \
     src/singleton.h \
     src/ui/button.h \
@@ -50,7 +56,8 @@ HEADERS += \
     src/ui/receivercontent.h \
     src/ui/recordbutton.h \
     src/ui/rootwidget.h \
-    src/ui/updatercontent.h
+    src/ui/updatercontent.h \
+    src/utils.h
 
 INCLUDEPATH += "$$PWD/src"
 

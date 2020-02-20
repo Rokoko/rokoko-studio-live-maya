@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QSpinBox>
 #include <QLabel>
+#include <QTreeWidget>
 
 class ReceiverContent : public QWidget
 {
@@ -12,14 +13,14 @@ class ReceiverContent : public QWidget
 public:
     ReceiverContent(QWidget* parent=nullptr);
     ~ReceiverContent();
-public slots:
-    void handleListenerError(QString);
 private:
     void onReceiveToggled(bool);
     QSpinBox* portBox=nullptr;
     DataReceivingWorker* worker=nullptr;
-    QLabel* testLabel=nullptr;
-    QThread* listenerThread=nullptr;
+    QLabel* statusLabel=nullptr;
+    QTreeWidget* treeWidget=nullptr;
+    void populateTree();
+    void clearTreeWidget();
 };
 
 #endif // RECEIVERCONTENT_H
