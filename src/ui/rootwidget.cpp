@@ -5,11 +5,11 @@
 #include "ui/rootwidget.h"
 #include "ui/categoryheader.h"
 #include "ui/infocontent.h"
-#include "ui/receivercontent.h"
 #include "ui/commandapicontent.h"
 #include "ui/updatercontent.h"
 
 
+#include <QThread>
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QFile>
@@ -35,9 +35,9 @@ RootWidget::RootWidget(QWidget *parent)
     // Rokoko studio live category
     CategoryHeader* receiverHeader = new CategoryHeader(this, "Rokoko Studio Live");
     mainLayout->addWidget(receiverHeader, 0, Qt::AlignTop);
-    ReceiverContent* receiverContent = new ReceiverContent(this);
+    receiverContent = new ReceiverContent(this);
     mainLayout->addWidget(receiverContent, 0, Qt::AlignTop);
-    connect(receiverHeader, &CategoryHeader::collapseStateChanged, [receiverContent](bool bCollapsed) {
+    connect(receiverHeader, &CategoryHeader::collapseStateChanged, [this](bool bCollapsed) {
         receiverContent->setVisible(!bCollapsed);
     });
 
