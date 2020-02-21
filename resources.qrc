@@ -13,5 +13,9 @@
         <file>resources/paper.svg</file>
         <file>resources/icon-vp-32.png</file>
         <file>resources/cube.png</file>
+        <file>resources/icon-rokoko-32.png</file>
+        <file>resources/icon-row-suit-32.png</file>
+        <file>resources/icon-row-face-32.png</file>
+        <file>resources/icon-paired-32.png</file>
     </qresource>
 </RCC>

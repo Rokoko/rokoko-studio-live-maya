@@ -45,7 +45,6 @@ SOURCES += \
 HEADERS += \
     src/animations.h \
     src/constants.h \
-    src/interfaces.h \
     src/mapping.h \
     src/receiverworker.h \
     src/singleton.h \

@@ -13,13 +13,25 @@ public:
     QHash<QString, QJsonObject> &getProps();
     void putTrackers(const QHash<QString, QJsonObject>&);
     QHash<QString, QJsonObject> &getTrackers();
+    void putActors(const QHash<QString, QJsonObject>&);
+    QHash<QString, QJsonObject> &getActors();
+    void putFaces(const QHash<QString, QJsonObject>&);
+    QHash<QString, QJsonObject> &getFaces();
+
+    float timestamp;
+    float playbackTimestamp;
 private:
     // prop id - json
     QHash<QString, QJsonObject> propsMap;
     // tracker name - json
     QHash<QString, QJsonObject> trackersMap;
+    // actor id - json
+    QHash<QString, QJsonObject> actorsMap;
+    // faceId - json
+    QHash<QString, QJsonObject> facesMap;
 };
 
 typedef Singleton<_Animations> Animations;
 
 #endif // ANIMATIONS_H
+

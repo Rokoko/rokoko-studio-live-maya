@@ -25,6 +25,10 @@ void DataReceivingWorker::pause() {
 
 void DataReceivingWorker::processData(QJsonObject data)
 {
+    // put timestamps
+    Animations::get()->timestamp = data["timestamp"].toDouble();
+    Animations::get()->playbackTimestamp = data["playbackTimestamp"].toDouble();
+
     // parse props
     QJsonArray propsArray = data["props"].toArray();
     QHash<QString, QJsonObject> propsMap;
@@ -32,7 +36,7 @@ void DataReceivingWorker::processData(QJsonObject data)
         QJsonObject prop = value.toObject();
         propsMap[prop["id"].toString()] = prop;
     }
-    Animations::getInstance()->putProps(propsMap);
+    Animations::get()->putProps(propsMap);
 
     // parse trackers
     QHash<QString, QJsonObject> trackersMap;
@@ -41,7 +45,26 @@ void DataReceivingWorker::processData(QJsonObject data)
         QJsonObject tracker = value.toObject();
         trackersMap[tracker["name"].toString()] = tracker;
     }
-    Animations::getInstance()->putTrackers(trackersMap);
+    Animations::get()->putTrackers(trackersMap);
+
+    // put faces
+    QHash<QString, QJsonObject> facesMap;
+    QJsonArray faceArray = data["faces"].toArray();
+    foreach(auto face, faceArray) {
+        QJsonObject faceObject = face.toObject();
+        facesMap[face["faceId"].toString()] = faceObject;
+    }
+    Animations::get()->putFaces(facesMap);
+
+    // parse actors
+    QHash<QString, QJsonObject> actorsMap;
+    QJsonArray actorsArray = data["actors"].toArray();
+    foreach(const QJsonValue& value, actorsArray) {
+        QJsonObject actor = value.toObject();
+        actorsMap[actor["id"].toString()] = actor;
+    }
+    Animations::get()->putActors(actorsMap);
+
 }
 
 void DataReceivingWorker::onSocketError(QAbstractSocket::SocketError err)
@@ -77,6 +100,14 @@ void DataReceivingWorker::readData() {
     QJsonDocument doc = QJsonDocument::fromJson(datagram.data());
 
     QJsonObject frameData = doc.object();
+
+//    static bool bDump = true;
+//    if(bDump) {
+//        QFile f("C:/Users/Ilgar/Desktop/data.json");
+//        f.open(QFile::WriteOnly);
+//        f.write(doc.toJson(QJsonDocument::Indented));
+//        f.close();
+//    }
 
     int protocolVersion = frameData["version"].toInt();
     if(protocolVersion != 2) {
