@@ -11,7 +11,6 @@ DataReceivingWorker::DataReceivingWorker(QObject* parent)
     socket = new QUdpSocket(this);
 
     connect(socket, &QUdpSocket::connected, this, &DataReceivingWorker::onSocketConnected);
-//    connect(socket, &QUdpSocket::readyRead, this, &DataReceivingWorker::readData);
     connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &DataReceivingWorker::onSocketError);
 
     connect(&hearbeat, &QTimer::timeout, this, &DataReceivingWorker::onHearBeat);
@@ -101,14 +100,6 @@ void DataReceivingWorker::readData() {
 
     QJsonObject frameData = doc.object();
 
-//    static bool bDump = true;
-//    if(bDump) {
-//        QFile f("C:/Users/Ilgar/Desktop/data.json");
-//        f.open(QFile::WriteOnly);
-//        f.write(doc.toJson(QJsonDocument::Indented));
-//        f.close();
-//    }
-
     int protocolVersion = frameData["version"].toInt();
     if(protocolVersion != 2) {
         emit workerStateChanged("Not valid data format! Use JSON v2!");
@@ -116,6 +107,7 @@ void DataReceivingWorker::readData() {
         return;
     }
 
+    // TODO: emit only on change
     emit workerStateChanged("Working");
     processData(frameData);
 }
