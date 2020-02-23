@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <maya/MGlobal.h>
 
 #include "ui/rootwidget.h"

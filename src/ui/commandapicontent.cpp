@@ -1,6 +1,6 @@
-#include <iostream>
 #include "commandapicontent.h"
 #include "constants.h"
+#include "utils.h"
 #include "ui/button.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -52,15 +52,8 @@ CommandApiContent::CommandApiContent(QWidget* parent)
 
     manager = new QNetworkAccessManager(this);
     connect(manager, &QNetworkAccessManager::finished, [&](QNetworkReply* reply) {
-        if(reply->error() == QNetworkReply::NoError)
-        {
-            QByteArray result = reply->readAll();
-            QJsonDocument doc = QJsonDocument::fromJson(result);
-            QJsonObject resultObject = doc.object();
-            std::cout << resultObject["response_code"].toString().toStdString().c_str() << " < SUCCESS\n";
-        } else {
-            handleError(reply);
-        }
+        if(!isError(reply))
+            Utils::mayaPrintMessage("Success");
     });
 
     // command buttons
@@ -125,9 +118,39 @@ CommandApiContent::CommandApiContent(QWidget* parent)
     mainLayout->addLayout(commandsLayout);
 }
 
-void CommandApiContent::handleError(QNetworkReply* reply)
+bool CommandApiContent::isError(QNetworkReply* reply)
 {
-    std::cout << reply->errorString().toStdString().c_str() << "\n";
+
+    if(reply->error() == QNetworkReply::NetworkError::ConnectionRefusedError) {
+        // command api server disabled completely
+        Utils::spawnMayaError("Couldn't conect to Rokoko Studio!");
+        return true;
+    } else {
+        QByteArray result = reply->readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(result);
+        QJsonObject resultObject = doc.object();
+
+        QString responseMessage = resultObject["response_code"].toString();
+        QString descriptionMessage = resultObject["description"].toString();
+
+        // command api server enabled but something is wrong
+        if(responseMessage != "OK")
+        {
+            if(responseMessage == "INVALID_REQUEST") {
+                Utils::spawnMayaError(QString("%1: %2. %3")
+                              .arg(responseMessage)
+                              .arg(descriptionMessage)
+                              .arg("Check your API key"));
+            } else {
+                Utils::spawnMayaError(QString("%1: %2")
+                              .arg(responseMessage)
+                              .arg(descriptionMessage));
+            }
+            return true;
+        }
+        // everything is ok
+        return false;
+    }
 }
 
 void CommandApiContent::ping()

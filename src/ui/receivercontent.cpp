@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "receivercontent.h"
 #include "receiverworker.h"
 #include "animations.h"

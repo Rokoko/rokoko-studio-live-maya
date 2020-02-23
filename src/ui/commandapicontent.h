@@ -12,7 +12,7 @@ class CommandApiContent : public QWidget
     Q_OBJECT
 public:
     CommandApiContent(QWidget* parent=nullptr);
-    void handleError(QNetworkReply* reply);
+    bool isError(QNetworkReply* reply);
     void ping();
 private:
     QNetworkAccessManager* manager=nullptr;
