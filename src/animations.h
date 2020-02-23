@@ -18,6 +18,8 @@ public:
     void putFaces(const QHash<QString, QJsonObject>&);
     QHash<QString, QJsonObject> &getFaces();
 
+    void applyAnimationsToMappedObjects();
+
     float timestamp;
     float playbackTimestamp;
 private:

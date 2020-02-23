@@ -44,3 +44,8 @@ QHash<QString, QJsonObject> &_Animations::getFaces()
 {
     return facesMap;
 }
+
+void _Animations::applyAnimationsToMappedObjects()
+{
+
+}
