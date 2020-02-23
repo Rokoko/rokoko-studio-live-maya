@@ -137,7 +137,7 @@ bool CommandApiContent::isError(QNetworkReply* reply)
         if(responseMessage != "OK")
         {
             if(responseMessage == "INVALID_REQUEST") {
-                Utils::spawnMayaError(QString("%1: %2. %3")
+                Utils::spawnMayaError(QString("%1: %2 %3")
                               .arg(responseMessage)
                               .arg(descriptionMessage)
                               .arg("Check your API key"));
