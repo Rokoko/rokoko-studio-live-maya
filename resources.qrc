@@ -17,5 +17,8 @@
         <file>resources/icon-row-suit-32.png</file>
         <file>resources/icon-row-face-32.png</file>
         <file>resources/icon-paired-32.png</file>
+        <file>resources/mapToSelectedObjects.mel</file>
+        <file>resources/unmapRSObject.mel</file>
+        <file>resources/selectMappedObjects.mel</file>
     </qresource>
 </RCC>

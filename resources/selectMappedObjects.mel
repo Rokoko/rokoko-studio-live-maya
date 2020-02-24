@@ -1,0 +1,11 @@
+string $allTransforms[] = `ls -tr`;
+
+select -cl;
+for($tr in $allTransforms) {
+    if(`attributeExists "MAPPING_FIELD_NAME" $tr`) {
+        string $rsId = getAttr ($tr + ".MAPPING_FIELD_NAME");
+        if($rsId == "RS_ID_TAG") {
+            select -add $tr;
+        }
+    }
+}

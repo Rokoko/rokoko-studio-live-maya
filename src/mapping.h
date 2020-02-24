@@ -5,10 +5,16 @@
 #include <QHash>
 
 
+
 class _Mapping
 {
 public:
     _Mapping();
+    void mapRSObjectToSelection(QString rsObjectID);
+    // unmap everything from this object
+    void unmapRSObject(QString rsObjectID);
+    // select mapped objects
+    void selectObjects(QString rsObjectID);
     void setProps(const QHash<QString, QString>&);
 private:
     // prop id - maya uuid

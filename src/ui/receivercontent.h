@@ -19,6 +19,7 @@ private:
     DataReceivingWorker* worker=nullptr;
     QLabel* statusLabel=nullptr;
     QTreeWidget* treeWidget=nullptr;
+    void prepareContextMenu(const QPoint &pos);
     void populateTree();
     void clearTreeWidget();
 };

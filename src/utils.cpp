@@ -3,6 +3,7 @@
 #include <maya/MGlobal.h>
 #include <maya/MString.h>
 
+
 void Utils::spawnMayaError(QString message)
 {
     QString cmd = QString("error -n \"%1\";").arg(message);
@@ -16,3 +17,4 @@ void Utils::mayaPrintMessage(QString message)
     MString mayaCmd(cmd.toStdString().c_str());
     MGlobal::executeCommand(mayaCmd);
 }
+

@@ -1,6 +1,8 @@
 #include "receivercontent.h"
 #include "receiverworker.h"
 #include "animations.h"
+#include "mapping.h"
+#include "utils.h"
 #include "ui/button.h"
 #include "ui/recordbutton.h"
 
@@ -15,6 +17,7 @@
 #include <QCheckBox>
 #include <QJsonArray>
 #include <QTimer>
+#include <QMenu>
 
 
 ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
@@ -80,6 +83,8 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
 
     // tree widget
     treeWidget = new QTreeWidget(this);
+    treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(treeWidget, &QTreeWidget::customContextMenuRequested, this, &ReceiverContent::prepareContextMenu);
     treeWidget->headerItem()->setHidden(true);
     treeWidget->setRootIsDecorated(false);
     mainLayout->addWidget(treeWidget);
@@ -110,6 +115,31 @@ void ReceiverContent::onReceiveToggled(bool checked)
     }
 }
 
+void ReceiverContent::prepareContextMenu(const QPoint &pos)
+{
+    QTreeWidgetItem* item = treeWidget->itemAt(pos);
+    if(item) {
+        QString itemlabel = item->text(0);
+        QString itemId = item->data(0, Qt::UserRole).toString();
+
+        // this item can't be mapped
+        if(itemId.isEmpty()) return;
+
+        QMenu menu(this);
+        menu.addAction("Map to selected objects", [=](){
+            Mapping::get()->mapRSObjectToSelection(itemId);
+        });
+        menu.addAction("Unmap all", [=](){
+            Mapping::get()->unmapRSObject(itemId);
+        });
+        menu.addAction("Select objects", [=](){
+            Mapping::get()->selectObjects(itemId);
+        });
+        menu.exec(treeWidget->mapToGlobal(pos));
+    }
+
+}
+
 void ReceiverContent::populateTree()
 {
     QTimer::singleShot(500, [&](){
@@ -120,6 +150,8 @@ void ReceiverContent::populateTree()
             QTreeWidgetItem* propItem = new QTreeWidgetItem(treeWidget);
             propItem->setText(0, prop["name"].toString());
             propItem->setIcon(0, QIcon(":/resources/cube.png"));
+            // put rs object id into user data, to e used by context menu
+            propItem->setData(0, Qt::UserRole, QVariant(prop["id"].toString()));
             propsItemMap[prop["id"].toString()] = propItem;
         }
 
@@ -137,6 +169,8 @@ void ReceiverContent::populateTree()
             QTreeWidgetItem* actorItem = new QTreeWidgetItem(profileItem);
             actorItem->setText(0, actorName);
             actorItem->setIcon(0, QIcon(":/resources/icon-row-suit-32.png"));
+            // put rs object id into user data, to e used by context menu
+            actorItem->setData(0, Qt::UserRole, QVariant(actor["id"].toString()));
             actorsMap[actor["id"].toString()] = actorItem;
         }
 
@@ -151,8 +185,10 @@ void ReceiverContent::populateTree()
             } else
                 faceItem = new QTreeWidgetItem(treeWidget);
 
-            faceItem->setText(0, face["faceId"].toString());
+            QString faceId = face["faceId"].toString();
+            faceItem->setText(0, faceId);
             faceItem->setIcon(0, QIcon(":/resources/icon-row-face-32.png"));
+            faceItem->setData(0, Qt::UserRole, QVariant(faceId));
             assert(faceItem != nullptr);
         }
 
@@ -168,8 +204,10 @@ void ReceiverContent::populateTree()
             assert(parentItem != nullptr);
 
             QTreeWidgetItem* trackerItem = new QTreeWidgetItem(parentItem);
-            trackerItem->setText(0, tracker["name"].toString());
+            QString trackerId = tracker["name"].toString();
+            trackerItem->setText(0, trackerId);
             trackerItem->setIcon(0, QIcon(":/resources/icon-vp-32.png"));
+            trackerItem->setData(0, Qt::UserRole, QVariant(trackerId));
         }
 
         treeWidget->expandAll();
