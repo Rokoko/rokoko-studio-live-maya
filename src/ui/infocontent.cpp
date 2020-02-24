@@ -1,4 +1,4 @@
-#include <iostream>
+#include "utils.h"
 #include "infocontent.h"
 #include <QDesktopServices>
 #include <QUrl>
@@ -37,7 +37,8 @@ InfoContent::InfoContent(QWidget* parent) : QWidget(parent)
     // license
     QPushButton* licenseBtn = new QPushButton("License", this);
     connect(licenseBtn, &QPushButton::clicked, [](){
-        std::cout << "Open LICENSE.md\n";
+        Utils::mayaPrintMessage("Open LICENSE.md");
+
     });
     licenseWebsiteLayout->addWidget(licenseBtn);
 
@@ -51,14 +52,14 @@ InfoContent::InfoContent(QWidget* parent) : QWidget(parent)
     // docs
     QPushButton* docsBtn = new QPushButton("Documentation", this);
     connect(docsBtn, &QPushButton::clicked, [](){
-        std::cout << "Open docs\n";
+        Utils::mayaPrintMessage("Open docs");
     });
     mainLayout->addWidget(docsBtn);
 
     // forums
     QPushButton* fodumsBtn = new QPushButton("Join our forums", this);
     connect(fodumsBtn, &QPushButton::clicked, [](){
-        std::cout << "Open forums\n";
+        Utils::mayaPrintMessage("Open forums");
     });
     mainLayout->addWidget(fodumsBtn);
 

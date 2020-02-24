@@ -1,7 +1,5 @@
-#include <iostream>
 #include "receiverworker.h"
 #include "animations.h"
-#include <iostream>
 #include <QFile>
 #include <QJsonArray>
 
@@ -68,13 +66,15 @@ void DataReceivingWorker::processData(QJsonObject data)
 
 void DataReceivingWorker::onSocketError(QAbstractSocket::SocketError err)
 {
+    Q_UNUSED(err);
+
     emit workerStateChanged(QString("Socket error! %1").arg(socket->errorString()));
 
 }
 
 void DataReceivingWorker::start(int port) {
     if(!socket->bind(QHostAddress::LocalHost, port, QAbstractSocket::ReuseAddressHint)){
-        emit workerStateChanged("Not sonnceted!");
+        emit workerStateChanged("Not connected!");
     } else {
         emit onSocketConnected();
     }

@@ -1,6 +1,5 @@
 #include "button.h"
 #include <QPainter>
-#include <iostream>
 
 
 Button::Button(QWidget *parent, ButtonParams params)
