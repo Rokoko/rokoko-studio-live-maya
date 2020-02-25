@@ -22,15 +22,18 @@ void _Mapping::mapRSObjectToSelection(QString rsObjectID)
     cmdString.replace("RS_ID_TAG", rsObjectID);
     MGlobal::executeCommand(cmdString.toStdString().c_str());
     cmdFile.close();
+
+    // put
 }
 
-void _Mapping::unmapRSObject(QString rsObjectID)
+void _Mapping::unmapRSObject(QString rsObjectID, bool selected=false)
 {
     QFile cmdFile(":/resources/unmapRSObject.mel");
     cmdFile.open(QFile::ReadOnly);
     QString cmdString = cmdFile.readAll();
     cmdString.replace("MAPPING_FIELD_NAME", MAPPING_FILED_NAME);
     cmdString.replace("RS_ID_TAG", rsObjectID);
+    cmdString.replace("SELECTED_ONLY", selected ? "true" : "false");
     MGlobal::executeCommand(cmdString.toStdString().c_str());
     cmdFile.close();
 }
@@ -48,5 +51,5 @@ void _Mapping::selectObjects(QString rsObjectID)
 
 void _Mapping::setProps(const QHash<QString, QString>& newProps)
 {
-    propsMap = newProps;
+    objectsMap = newProps;
 }

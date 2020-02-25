@@ -12,13 +12,13 @@ public:
     _Mapping();
     void mapRSObjectToSelection(QString rsObjectID);
     // unmap everything from this object
-    void unmapRSObject(QString rsObjectID);
+    void unmapRSObject(QString rsObjectID, bool selected);
     // select mapped objects
     void selectObjects(QString rsObjectID);
     void setProps(const QHash<QString, QString>&);
 private:
     // prop id - maya uuid
-    QHash<QString, QString> propsMap;
+    QHash<QString, QString> objectsMap;
 };
 
 

@@ -129,8 +129,11 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
         menu.addAction("Map to selected objects", [=](){
             Mapping::get()->mapRSObjectToSelection(itemId);
         });
+        menu.addAction("Unmap selected objects", [=](){
+            Mapping::get()->unmapRSObject(itemId, true);
+        });
         menu.addAction("Unmap all", [=](){
-            Mapping::get()->unmapRSObject(itemId);
+            Mapping::get()->unmapRSObject(itemId, false);
         });
         menu.addAction("Select objects", [=](){
             Mapping::get()->selectObjects(itemId);
