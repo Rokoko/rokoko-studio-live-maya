@@ -45,6 +45,9 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     sceneScaleBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     sceneScaleBox->setAlignment(Qt::AlignCenter);
     sceneScaleBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    connect(sceneScaleBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double value) {
+        Animations::get()->setSceneScale(value);
+    });
     sceneScaleBox->setValue(1.0);
     formLayout->addRow("Scene scale:", sceneScaleBox);
     mainLayout->addLayout(formLayout);
@@ -215,6 +218,8 @@ void ReceiverContent::populateTree()
 
         treeWidget->expandAll();
         treeWidget->setItemsExpandable(false);
+
+        Mapping::get()->syncMapping();
     });
 }
 

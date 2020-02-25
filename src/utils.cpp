@@ -18,3 +18,13 @@ void Utils::mayaPrintMessage(QString message)
     MGlobal::executeCommand(mayaCmd);
 }
 
+MVector Utils::rsToMaya(MVector rsTranslation)
+{
+    return MVector(-rsTranslation.x, rsTranslation.y, rsTranslation.z);
+}
+
+MQuaternion Utils::rsToMaya(MQuaternion rsRotation)
+{
+    return MQuaternion(-rsRotation.x, rsRotation.y, rsRotation.z, -rsRotation.w);
+}
+

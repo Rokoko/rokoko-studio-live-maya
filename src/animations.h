@@ -20,9 +20,11 @@ public:
 
     void applyAnimationsToMappedObjects();
 
+    void setSceneScale(float scale);
     float timestamp;
     float playbackTimestamp;
 private:
+    float sceneScale = 1.0;
     // prop id - json
     QHash<QString, QJsonObject> propsMap;
     // tracker name - json

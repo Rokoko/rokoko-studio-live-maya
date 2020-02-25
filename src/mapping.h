@@ -2,7 +2,8 @@
 #define _MAPPING_H
 
 #include "singleton.h"
-#include <QHash>
+#include <maya/MObject.h>
+#include <QMultiMap>
 
 
 
@@ -15,10 +16,13 @@ public:
     void unmapRSObject(QString rsObjectID, bool selected);
     // select mapped objects
     void selectObjects(QString rsObjectID);
-    void setProps(const QHash<QString, QString>&);
+    // we need to populate mapped objects when plugin
+    // starts or rs objects scene changed
+    void syncMapping();
+    const QMultiMap<QString, MObject>& getMapping() { return objectsMap; }
 private:
-    // prop id - maya uuid
-    QHash<QString, QString> objectsMap;
+    // prop id - maya object
+    QMultiMap<QString, MObject> objectsMap;
 };
 
 
