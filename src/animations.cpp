@@ -59,10 +59,34 @@ void _Animations::applyAnimationsToMappedObjects()
 {
     const QMultiMap<QString, MObject> mapping = Mapping::get()->getMapping();
 
-    // apply props animations
-    QList<QString> propKeys = mapping.keys();
-    for(QString key : propKeys) {
-        auto it = mapping.find(key);
+    struct Local {
+        static void animatePropOrTracker(QJsonObject obj, MDagPath dagPath) {
+            QJsonObject postitionObject = obj["position"].toObject();
+            QJsonObject rotationObject = obj["rotation"].toObject();
+            MVector rsPosition(postitionObject["x"].toDouble(),
+                               postitionObject["y"].toDouble(),
+                               postitionObject["z"].toDouble());
+
+            MQuaternion rsRotation(rotationObject["x"].toDouble(),
+                                   rotationObject["y"].toDouble(),
+                                   rotationObject["z"].toDouble(),
+                                   rotationObject["w"].toDouble());
+
+
+            // convert RS transform to Maya transform
+            MVector mayaPosition = Utils::rsToMaya(rsPosition) * Animations::get()->sceneScale();
+            MQuaternion mayaRotation = Utils::rsToMaya(rsRotation);
+
+            // apply converted transform onto mapped object
+            MFnTransform fn(dagPath);
+            fn.setTranslation(mayaPosition, MSpace::kWorld);
+            fn.setRotation(mayaRotation, MSpace::kWorld);
+        }
+    };
+
+    QList<QString> allIds = mapping.keys();
+    for(QString rsId : allIds) {
+        auto it = mapping.find(rsId);
         if(it != mapping.end()) {
             while(it != mapping.end()) {
                 QString rsId = it.key();
@@ -70,29 +94,15 @@ void _Animations::applyAnimationsToMappedObjects()
                 MDagPath dagPath;
                 MDagPath::getAPathTo(object, dagPath);
 
-                // convert RS transform to Maya transform
+                // apply props animations
                 if(propsMap.contains(rsId)) {
                     QJsonObject propObject = propsMap[rsId];
-
-                    QJsonObject postitionObject = propObject["position"].toObject();
-                    QJsonObject rotationObject = propObject["rotation"].toObject();
-                    MVector rsPosition(postitionObject["x"].toDouble(),
-                                       postitionObject["y"].toDouble(),
-                                       postitionObject["z"].toDouble());
-
-                    MQuaternion rsRotation(rotationObject["x"].toDouble(),
-                                           rotationObject["y"].toDouble(),
-                                           rotationObject["z"].toDouble(),
-                                           rotationObject["w"].toDouble());
-
-
-                    MVector mayaTranslation = Utils::rsToMaya(rsPosition) * sceneScale;
-                    MQuaternion mayaQuat = Utils::rsToMaya(rsRotation);
-
-                    // apply converted transform onto mapped object
-                    MFnTransform fn(dagPath);
-                    fn.setTranslation(mayaTranslation, MSpace::kWorld);
-                    fn.setRotation(mayaQuat, MSpace::kWorld);
+                    Local::animatePropOrTracker(propObject, dagPath);
+                } else if(trackersMap.contains(rsId)) {
+                    QJsonObject trackerObject = trackersMap[rsId];
+                    Local::animatePropOrTracker(trackerObject, dagPath);
+                } else if(facesMap.contains(rsId)) {
+                } else if(actorsMap.contains(rsId)) {
                 } else {
                     // this should never happen
                     std::cout << "MAPPED OBJECTS NOT FOUND IN DATA STREAM!!!!\n";
@@ -116,5 +126,5 @@ void _Animations::applyAnimationsToMappedObjects()
 
 void _Animations::setSceneScale(float scale)
 {
-    sceneScale = scale;
+    _sceneScale = scale;
 }
