@@ -20,5 +20,6 @@
         <file>resources/mapToSelectedObjects.mel</file>
         <file>resources/unmapRSObject.mel</file>
         <file>resources/selectMappedObjects.mel</file>
+        <file>resources/createHIKForActor.mel</file>
     </qresource>
 </RCC>

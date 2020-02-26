@@ -2,6 +2,7 @@
 #include "mapping.h"
 #include "utils.h"
 #include <QFile>
+#include <QTimer>
 #include <maya/MFn.h>
 #include <maya/MGlobal.h>
 #include <maya/MObject.h>
@@ -111,11 +112,11 @@ void _Mapping::selectObjects(QString rsObjectID)
     QFile cmdFile(":/resources/selectMappedObjects.mel");
     cmdFile.open(QFile::ReadOnly);
     QString cmdString = cmdFile.readAll();
+    cmdFile.close();
 
     cmdString.replace("MAPPING_FIELD_NAME", MAPPING_FILED_NAME);
     cmdString.replace("RS_ID_TAG", rsObjectID);
     MGlobal::executeCommand(cmdString.toStdString().c_str());
-    cmdFile.close();
 }
 
 void _Mapping::syncMapping()
@@ -140,4 +141,18 @@ void _Mapping::syncMapping()
         }
         nodesIt.next();
     }
+}
+
+void _Mapping::createHIKForActor(QString rsObjectID)
+{
+    QFile cmdFile(":/resources/createHIKForActor.mel");
+    cmdFile.open(QFile::ReadOnly);
+    QString cmdString = cmdFile.readAll();
+    cmdFile.close();
+
+    cmdString.replace("ACTOR_ID", rsObjectID);
+    MGlobal::executeCommand(cmdString.toStdString().c_str());
+    QTimer::singleShot(1500, []() {
+        MGlobal::executeCommand("hikToggleLockDefinition();");
+    });
 }

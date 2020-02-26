@@ -20,6 +20,14 @@
 #include <QMenu>
 
 
+enum class RSObjectType : uint8_t {
+    PROP = 0,
+    TRACKER,
+    FACE,
+    ACTOR
+};
+
+
 ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
 {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
@@ -124,23 +132,42 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
     if(item) {
         QString itemlabel = item->text(0);
         QString itemId = item->data(0, Qt::UserRole).toString();
+        RSObjectType itemType = static_cast<RSObjectType>(item->data(1, Qt::UserRole).toInt());
 
         // this item can't be mapped
         if(itemId.isEmpty()) return;
 
+        // check item type and create special menus for actors
+        // ...
+
+
         QMenu menu(this);
-        menu.addAction("Map to selected objects", [=](){
-            Mapping::get()->mapRSObjectToSelection(itemId);
-        });
-        menu.addAction("Unmap selected objects", [=](){
-            Mapping::get()->unmapRSObject(itemId, true);
-        });
-        menu.addAction("Unmap all", [=](){
-            Mapping::get()->unmapRSObject(itemId, false);
-        });
-        menu.addAction("Select objects", [=](){
-            Mapping::get()->selectObjects(itemId);
-        });
+        if(itemType == RSObjectType::PROP || itemType == RSObjectType::TRACKER) {
+            menu.addAction("Map to selected objects", [=](){
+                Mapping::get()->mapRSObjectToSelection(itemId);
+            });
+            menu.addAction("Unmap selected objects", [=](){
+                Mapping::get()->unmapRSObject(itemId, true);
+            });
+            menu.addAction("Unmap all", [=](){
+                Mapping::get()->unmapRSObject(itemId, false);
+            });
+            menu.addAction("Select objects", [=](){
+                Mapping::get()->selectObjects(itemId);
+            });
+        }
+
+        if(itemType == RSObjectType::ACTOR)
+        {
+            menu.addAction("Create HIK skeleton", [=](){
+                Mapping::get()->createHIKForActor(itemId);
+            });
+
+            menu.addAction("Map to active character", [=](){
+
+            });
+        }
+
         menu.exec(treeWidget->mapToGlobal(pos));
     }
 
@@ -158,6 +185,7 @@ void ReceiverContent::populateTree()
             propItem->setIcon(0, QIcon(":/resources/cube.png"));
             // put rs object id into user data, to e used by context menu
             propItem->setData(0, Qt::UserRole, QVariant(prop["id"].toString()));
+            propItem->setData(1, Qt::UserRole, QVariant((int)RSObjectType::PROP));
             propsItemMap[prop["id"].toString()] = propItem;
         }
 
@@ -177,6 +205,8 @@ void ReceiverContent::populateTree()
             actorItem->setIcon(0, QIcon(":/resources/icon-row-suit-32.png"));
             // put rs object id into user data, to e used by context menu
             actorItem->setData(0, Qt::UserRole, QVariant(actor["id"].toString()));
+            actorItem->setData(1, Qt::UserRole, QVariant((int)RSObjectType::ACTOR));
+
             actorsMap[actor["id"].toString()] = actorItem;
         }
 
@@ -195,6 +225,7 @@ void ReceiverContent::populateTree()
             faceItem->setText(0, faceId);
             faceItem->setIcon(0, QIcon(":/resources/icon-row-face-32.png"));
             faceItem->setData(0, Qt::UserRole, QVariant(faceId));
+            faceItem->setData(1, Qt::UserRole, QVariant((int)RSObjectType::FACE));
             assert(faceItem != nullptr);
         }
 
@@ -214,6 +245,7 @@ void ReceiverContent::populateTree()
             trackerItem->setText(0, trackerId);
             trackerItem->setIcon(0, QIcon(":/resources/icon-vp-32.png"));
             trackerItem->setData(0, Qt::UserRole, QVariant(trackerId));
+            trackerItem->setData(1, Qt::UserRole, QVariant((int)RSObjectType::TRACKER));
         }
 
         treeWidget->expandAll();

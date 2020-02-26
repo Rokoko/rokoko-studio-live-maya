@@ -19,6 +19,9 @@ public:
     // we need to populate mapped objects when plugin
     // starts or rs objects scene changed
     void syncMapping();
+
+    void createHIKForActor(QString rsObjectID);
+
     const QMultiMap<QString, MObject>& getMapping() { return objectsMap; }
 private:
     // prop id - maya object

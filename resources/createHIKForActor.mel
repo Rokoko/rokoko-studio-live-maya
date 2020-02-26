@@ -1,0 +1,13 @@
+// create hik skeleton and definition
+hikCreateSkeleton();
+// rename
+string $currentCharacterName = hikGetCurrentCharacter();
+rename $currentCharacterName "ACTOR_ID";
+hikSetCurrentCharacter("ACTOR_ID");
+hikRenameConnectedNodes("ACTOR_ID", $currentCharacterName);
+if ( hikIsCharacterizationToolUICmdPluginLoaded() )
+{
+    hikUpdateCharacterList();
+    hikUpdateSourceList();
+    hikUpdateContextualUI();
+}
