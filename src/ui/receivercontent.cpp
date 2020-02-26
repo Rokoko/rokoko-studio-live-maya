@@ -164,7 +164,9 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
             });
 
             menu.addAction("Map to active character", [=](){
-
+                if(!Mapping::get()->mapActorToCurrentMayaCharacter(itemId)) {
+                    Utils::spawnMayaError("Failed to map character!");
+                }
             });
         }
 

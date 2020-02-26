@@ -136,11 +136,26 @@ void _Mapping::syncMapping()
             MString rsIdValue = fn.findPlug(fieldName).asString();
             objectsMap.insert(rsIdValue.asChar(), object);
             std::cout << "sync object: " << rsIdValue.asChar() << "\n";
-        } else {
-            std::cout << "sync object failed " << fn.name().asChar() << "\n";
         }
         nodesIt.next();
     }
+}
+
+bool _Mapping::mapActorToCurrentMayaCharacter(QString actorID)
+{
+    // get active maya character name
+    QString activeCharacterName = Mapping::get()->getCurrentMayaCharacter();
+    if(activeCharacterName.isEmpty()) return false;
+    // find hips joint by character name and NAME_Hips pattern
+    MSelectionList hipsLs;
+    QString hipsBoneName = QString("%1_Hips").arg(activeCharacterName);
+    MStatus hipsFound = MGlobal::getSelectionListByName(MString(hipsBoneName.toStdString().c_str()), hipsLs);
+    if(hipsFound != MStatus::kSuccess) return false;
+    MObject hipsObject;
+    hipsLs.getDependNode(0, hipsObject);
+    // map rs character id to this character hips object adding RokokoMapping custom attribute to it
+    objectsMap.insert(actorID, hipsObject);
+    return true;
 }
 
 void _Mapping::createHIKForActor(QString rsObjectID)
@@ -152,7 +167,14 @@ void _Mapping::createHIKForActor(QString rsObjectID)
 
     cmdString.replace("ACTOR_ID", rsObjectID);
     MGlobal::executeCommand(cmdString.toStdString().c_str());
-    QTimer::singleShot(1500, []() {
+    QTimer::singleShot(500, []() {
         MGlobal::executeCommand("hikToggleLockDefinition();");
     });
+}
+
+QString _Mapping::getCurrentMayaCharacter()
+{
+    MString currentCharacterName = MGlobal::executeCommandStringResult("hikGetCurrentCharacter();");
+    std::cout << currentCharacterName << " < Char name\n";
+    return QString(currentCharacterName.asChar());
 }

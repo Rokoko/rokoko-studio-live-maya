@@ -9,8 +9,14 @@
 
 #include <maya/MObject.h>
 #include <maya/MFnTransform.h>
+#include <maya/MFnIkJoint.h>
 #include <maya/MDagPath.h>
 #include <maya/MItDag.h>
+
+#ifdef _WINDOWS
+    #pragma comment(lib,"OpenMayaAnim.lib")
+#endif
+
 
 _Animations::_Animations()
 {
@@ -114,16 +120,27 @@ void _Animations::applyAnimationsToMappedObjects()
                 // apply actor animations
                 } else if(actorsMap.contains(rsId)) {
                     QJsonObject actorObject = actorsMap[rsId];
-//                    MItDag it;
-//                    it.reset(dagPath, MItDag::kBreadthFirst, MFn::kJoint);
-//                    while(!it.isDone()) {
-//                        MDagPath jointPath;
-//                        it.getPath(jointPath);
 
+                    // Hips joint mapped implicitly for user
+                    // BFS starting from Hips and apply data to each joints
 
+                    // We transform HIK source skeleton. To see results on custom character user chould create
+                    // Another character and define it, than set it as target for our generated character.
 
-//                        it.next();
-//                    }
+                    MItDag it;
+                    it.reset(dagPath, MItDag::kBreadthFirst, MFn::kJoint);
+                    while(!it.isDone()) {
+                        MDagPath jointPath;
+                        it.getPath(jointPath);
+
+                        MFnIkJoint ikJnt(jointPath);
+                        MString hikJointName = ikJnt.hikJointName();
+                        std::cout << hikJointName.asChar() << "\n";
+                        // get rs bone from maya bone
+//                        actorObject
+
+                        it.next();
+                    }
 
                 } else {
                     // this should never happen

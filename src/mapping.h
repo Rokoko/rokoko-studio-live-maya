@@ -20,7 +20,11 @@ public:
     // starts or rs objects scene changed
     void syncMapping();
 
+    // map actor id to maya hik root bone (hips)
+    bool mapActorToCurrentMayaCharacter(QString actorID);
+
     void createHIKForActor(QString rsObjectID);
+    QString getCurrentMayaCharacter();
 
     const QMultiMap<QString, MObject>& getMapping() { return objectsMap; }
 private:

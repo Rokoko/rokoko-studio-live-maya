@@ -1,7 +1,7 @@
 TEMPLATE = lib
 CONFIG += qt warn_on plugin
 
-LIBS		+= -L$$(DEVKIT_LOCATION)/lib -lOpenMaya -lOpenMayaUI -lFoundation
+LIBS		+= -L$$(DEVKIT_LOCATION)/lib -lOpenMaya -lOpenMayaUI -lFoundation -lOpenMayaAnim
 DEFINES		+= UNIX _BOOL LINUX FUNCPROTO \
 			_GNU_SOURCE LINUX_64 
 INCLUDEPATH	+= .. $$(DEVKIT_LOCATION)/include
