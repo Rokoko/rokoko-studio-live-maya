@@ -1,5 +1,6 @@
 #include "receiverworker.h"
 #include "animations.h"
+#include "animations.h"
 #include <QFile>
 #include <QJsonArray>
 
@@ -20,7 +21,7 @@ void DataReceivingWorker::pause() {
     socket->abort();
 }
 
-void DataReceivingWorker::processData(QJsonObject data)
+void DataReceivingWorker::parseData(QJsonObject data)
 {
     // put timestamps
     Animations::get()->timestamp = data["timestamp"].toDouble();
@@ -76,6 +77,7 @@ void DataReceivingWorker::start(int port) {
     if(!socket->bind(QHostAddress::LocalHost, port, QAbstractSocket::ReuseAddressHint)){
         emit workerStateChanged("Not connected!");
     } else {
+        // TODO: fetch maya objects with mapping attribute
         emit onSocketConnected();
     }
 }
@@ -109,7 +111,15 @@ void DataReceivingWorker::readData() {
 
     // TODO: emit only on change
     emit workerStateChanged("Working");
-    processData(frameData);
+
+    // 1 pass: parse json into Animatins storage
+    parseData(frameData);
+
+    // 2 pass: mapping is dynamyc and user can map/unmap objects at orbitrary moment
+
+    // 3 pass: apply data to currently mapped objects
+    Animations::get()->applyAnimationsToMappedObjects();
+
 }
 
 void DataReceivingWorker::onHearBeat()

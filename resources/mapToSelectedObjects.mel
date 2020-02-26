@@ -1,0 +1,10 @@
+string $rkk_selection[] = `ls -sl -tr`;
+
+for($member in $rkk_selection) {
+
+    if(!`attributeExists "MAPPING_FIELD_NAME" $member`) {
+        addAttr -ln "MAPPING_FIELD_NAME" -dt "string" -category "ROKOKO" $member;
+    }
+    setAttr -type "string" ($member + ".MAPPING_FIELD_NAME") "RS_ID_TAG";
+
+}

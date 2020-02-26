@@ -18,9 +18,14 @@ public:
     void putFaces(const QHash<QString, QJsonObject>&);
     QHash<QString, QJsonObject> &getFaces();
 
+    void applyAnimationsToMappedObjects();
+
+    void setSceneScale(float);
+    float sceneScale() { return _sceneScale; }
     float timestamp;
     float playbackTimestamp;
 private:
+    float _sceneScale = 1.0;
     // prop id - json
     QHash<QString, QJsonObject> propsMap;
     // tracker name - json

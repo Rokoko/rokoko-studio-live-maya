@@ -23,7 +23,7 @@ signals:
     void onSocketConnected();
 
 private:
-    void processData(QJsonObject);
+    void parseData(QJsonObject);
     void onSocketError(QAbstractSocket::SocketError);
     QUdpSocket* socket = nullptr;
     void readData();
