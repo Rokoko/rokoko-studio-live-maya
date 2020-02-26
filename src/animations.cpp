@@ -98,10 +98,13 @@ void _Animations::applyAnimationsToMappedObjects()
                 if(propsMap.contains(rsId)) {
                     QJsonObject propObject = propsMap[rsId];
                     Local::animatePropOrTracker(propObject, dagPath);
+                // apply trackers animations
                 } else if(trackersMap.contains(rsId)) {
                     QJsonObject trackerObject = trackersMap[rsId];
                     Local::animatePropOrTracker(trackerObject, dagPath);
+                // apply faces animations
                 } else if(facesMap.contains(rsId)) {
+                // apply actor animations
                 } else if(actorsMap.contains(rsId)) {
                 } else {
                     // this should never happen
@@ -113,15 +116,6 @@ void _Animations::applyAnimationsToMappedObjects()
             }
         }
     }
-
-    // aply tracker animations
-    // ...
-
-    // apply faces animations
-    // ...
-
-    // apply actors animations
-    // ...
 }
 
 void _Animations::setSceneScale(float scale)
