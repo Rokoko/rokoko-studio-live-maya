@@ -26,7 +26,7 @@ private:
     void parseData(QJsonObject);
     void onSocketError(QAbstractSocket::SocketError);
     QUdpSocket* socket = nullptr;
-    void readData();
+    void readAndApplyData();
     QTimer hearbeat;
     void onHearBeat();
 };

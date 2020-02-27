@@ -1,5 +1,6 @@
 #include "ui/rootwidget.h"
 #include "constants.h"
+#include "mapping.h"
 
 #include <QPointer>
 #include <QScrollArea>
@@ -51,5 +52,6 @@ MStatus uninitializePlugin(MObject plugin)
         rsmlScrollArea.clear();
     }
 
+    Mapping::get()->resetCallbacks();
     return result;
 }

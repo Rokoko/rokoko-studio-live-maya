@@ -2,10 +2,13 @@
 #define RECEIVERCONTENT_H
 
 #include "receiverworker.h"
+#include "ui/button.h"
 #include <QWidget>
 #include <QSpinBox>
 #include <QLabel>
 #include <QTreeWidget>
+
+#include <maya/MCallbackIdArray.h>
 
 class ReceiverContent : public QWidget
 {
@@ -18,10 +21,14 @@ private:
     QSpinBox* portBox=nullptr;
     DataReceivingWorker* worker=nullptr;
     QLabel* statusLabel=nullptr;
+    Button* startReceiverBtn=nullptr;
     QTreeWidget* treeWidget=nullptr;
     void prepareContextMenu(const QPoint &pos);
     void populateTree();
     void clearTreeWidget();
+    void reset();
+
+    MCallbackIdArray callbacks;
 };
 
 #endif // RECEIVERCONTENT_H

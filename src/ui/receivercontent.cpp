@@ -3,7 +3,6 @@
 #include "animations.h"
 #include "mapping.h"
 #include "utils.h"
-#include "ui/button.h"
 #include "ui/recordbutton.h"
 
 #include <QThread>
@@ -18,6 +17,8 @@
 #include <QJsonArray>
 #include <QTimer>
 #include <QMenu>
+
+#include <maya/MSceneMessage.h>
 
 
 enum class RSObjectType : uint8_t {
@@ -78,7 +79,7 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     receiverBtnParams.uncheckedStateText = "Start Receiver";
     receiverBtnParams.iconAlignment = Qt::AlignLeft;
 
-    Button* startReceiverBtn = new Button(this, receiverBtnParams);
+    startReceiverBtn = new Button(this, receiverBtnParams);
     startReceiverBtn->setCheckable(true);
     mainLayout->addWidget(startReceiverBtn);
     connect(startReceiverBtn, &Button::toggled, this, &ReceiverContent::onReceiveToggled);
@@ -107,11 +108,31 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
         statusLabel->setText(status);
     });
     connect(worker, &DataReceivingWorker::onSocketConnected, this, &ReceiverContent::populateTree);
+
+    // register scene callbacks
+    // register callbacks
+    MCallbackId beforeNewId = MSceneMessage::addCheckCallback(MSceneMessage::kBeforeNewCheck, [](bool* recCode, void* clientData) {
+        ReceiverContent* receiverWidget = static_cast<ReceiverContent*>(clientData);
+        if(receiverWidget) {
+            receiverWidget->reset();
+        }
+    }, this);
+    MCallbackId beforeOpenId = MSceneMessage::addCheckCallback(MSceneMessage::kBeforeOpenCheck, [](bool* recCode, void* clientData) {
+        ReceiverContent* receiverWidget = static_cast<ReceiverContent*>(clientData);
+        if(receiverWidget) {
+            receiverWidget->reset();
+        }
+    }, this);
+    callbacks.append(beforeNewId);
+    callbacks.append(beforeOpenId);
 }
 
 ReceiverContent::~ReceiverContent()
 {
     worker->pause();
+    for(MCallbackId id : callbacks) {
+        MSceneMessage::removeCallback(id);
+    }
 }
 
 
@@ -121,9 +142,7 @@ void ReceiverContent::onReceiveToggled(bool checked)
     {
         worker->start(portBox->value());
     } else {
-        worker->pause();
-        clearTreeWidget();
-        statusLabel->setText("");
+        reset();
     }
 }
 
@@ -272,5 +291,14 @@ void ReceiverContent::populateTree()
 void ReceiverContent::clearTreeWidget()
 {
     treeWidget->clear();
+}
+
+void ReceiverContent::reset()
+{
+    worker->pause();
+    clearTreeWidget();
+    statusLabel->setText("");
+    startReceiverBtn->setChecked(false);
+
 }
 

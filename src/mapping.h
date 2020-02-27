@@ -3,6 +3,7 @@
 
 #include "singleton.h"
 #include <maya/MObject.h>
+#include <maya/MCallbackIdArray.h>
 #include <QMultiMap>
 #include <QHash>
 
@@ -30,13 +31,18 @@ public:
     void createHIKForActor(QString rsObjectID);
     QString getCurrentMayaCharacter();
 
-    const QMultiMap<QString, MObject>& getObjectMapping() { return objectsMap; }
-    const QHash<QString, QString>& getBoneMapping() { return boneMapping; }
+    void clear();
+    void resetCallbacks();
+
+    const QMultiMap<QString, MObject> &getObjectMapping();
+    const QHash<QString, QString> &getBoneMapping();
 private:
     // prop id - maya object
     QMultiMap<QString, MObject> objectsMap;
     // maya hik bone name to rs bone name
     QHash<QString, QString> boneMapping;
+
+    MCallbackIdArray callbacks;
 };
 
 

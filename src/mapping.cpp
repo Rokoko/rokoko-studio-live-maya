@@ -12,9 +12,12 @@
 #include <maya/MFnDependencyNode.h>
 #include <maya/MItDependencyNodes.h>
 #include <maya/MItSelectionList.h>
+#include <maya/MMessage.h>
+#include <maya/MSceneMessage.h>
 
 
 const QString MAPPING_FILED_NAME = "RokokoMapping";
+
 
 
 _Mapping::_Mapping()
@@ -104,7 +107,15 @@ _Mapping::_Mapping()
     //    boneMapping["??"] = "rightToeEnd";
 
 
-
+    // register callbacks
+    MCallbackId beforeNewId = MSceneMessage::addCheckCallback(MSceneMessage::kBeforeNewCheck, [](bool* recCode, void* clientData) {
+        Mapping::get()->clear();
+    });
+    MCallbackId beforeOpenId = MSceneMessage::addCheckCallback(MSceneMessage::kBeforeOpenCheck, [](bool* recCode, void* clientData) {
+        Mapping::get()->clear();
+    });
+    callbacks.append(beforeNewId);
+    callbacks.append(beforeOpenId);
 
 }
 
@@ -319,3 +330,25 @@ QString _Mapping::getCurrentMayaCharacter()
     return QString(currentCharacterName.asChar());
 }
 
+void _Mapping::clear()
+{
+    objectsMap.clear();
+//    boneMapping.clear();
+}
+
+void _Mapping::resetCallbacks()
+{
+    for(MCallbackId id : callbacks) {
+        MSceneMessage::removeCallback(id);
+    }
+}
+
+const QMultiMap<QString, MObject> &_Mapping::getObjectMapping()
+{
+    return objectsMap;
+}
+
+const QHash<QString, QString> &_Mapping::getBoneMapping()
+{
+    return boneMapping;
+}
