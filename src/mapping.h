@@ -4,6 +4,7 @@
 #include "singleton.h"
 #include <maya/MObject.h>
 #include <QMultiMap>
+#include <QHash>
 
 
 
@@ -22,14 +23,20 @@ public:
 
     // map actor id to maya hik root bone (hips)
     bool mapActorToCurrentMayaCharacter(QString actorID);
+    void unmapMayaObjectByName(QString mayaObjecName);
+
+    void setOrCreateRSIdAttribute(QString mayaObjecName, QString rsObjectID);
 
     void createHIKForActor(QString rsObjectID);
     QString getCurrentMayaCharacter();
 
-    const QMultiMap<QString, MObject>& getMapping() { return objectsMap; }
+    const QMultiMap<QString, MObject>& getObjectMapping() { return objectsMap; }
+    const QHash<QString, QString>& getBoneMapping() { return boneMapping; }
 private:
     // prop id - maya object
     QMultiMap<QString, MObject> objectsMap;
+    // maya hik bone name to rs bone name
+    QHash<QString, QString> boneMapping;
 };
 
 

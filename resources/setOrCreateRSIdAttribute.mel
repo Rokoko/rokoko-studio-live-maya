@@ -1,0 +1,4 @@
+if (!`attributeExists "MAPPING_FIELD_NAME" "MAYA_OBJECT_NAME"`) {
+    addAttr -ln "MAPPING_FIELD_NAME" -dt "string" -category "ROKOKO" "MAYA_OBJECT_NAME";
+}
+setAttr -type "string" ("MAYA_OBJECT_NAME.MAPPING_FIELD_NAME") "RS_ID_TAG";

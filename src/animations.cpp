@@ -65,7 +65,8 @@ QHash<QString, QJsonObject> &_Animations::getFaces()
 
 void _Animations::applyAnimationsToMappedObjects()
 {
-    const QMultiMap<QString, MObject> mapping = Mapping::get()->getMapping();
+    const QMultiMap<QString, MObject> objectMapping = Mapping::get()->getObjectMapping();
+    const QHash<QString, QString> mayaToRsBoneNames = Mapping::get()->getBoneMapping();
 
     struct Local {
         static void animatePropOrTracker(QJsonObject obj, MDagPath dagPath) {
@@ -97,11 +98,11 @@ void _Animations::applyAnimationsToMappedObjects()
         }
     };
 
-    QList<QString> allIds = mapping.keys();
+    QList<QString> allIds = objectMapping.keys();
     for(QString rsId : allIds) {
-        auto it = mapping.find(rsId);
-        if(it != mapping.end()) {
-            while(it != mapping.end()) {
+        auto it = objectMapping.find(rsId);
+        if(it != objectMapping.end()) {
+            while(it != objectMapping.end()) {
                 QString rsId = it.key();
                 MObject object = it.value();
                 MDagPath dagPath;
@@ -124,20 +125,59 @@ void _Animations::applyAnimationsToMappedObjects()
                     // Hips joint mapped implicitly for user
                     // BFS starting from Hips and apply data to each joints
 
-                    // We transform HIK source skeleton. To see results on custom character user chould create
+                    // We transform HIK source skeleton. To see results on custom character user should create
                     // Another character and define it, than set it as target for our generated character.
 
                     MItDag it;
+                    MFnDagNode hipDagNode(dagPath);
+                    MVector referenceOffset;
+                    MQuaternion referenceQuat;
+                    if(hipDagNode.parentCount() > 0) {
+                        MObject hipsParentObject = hipDagNode.parent(0);
+                        MDagPath path;
+                        MDagPath::getAPathTo(hipsParentObject, path);
+                        MFnTransform parentFnTransform(path);
+                        referenceOffset = parentFnTransform.getTranslation(MSpace::kWorld);
+                        parentFnTransform.getRotation(referenceQuat, MSpace::kWorld);
+                        referenceQuat.normalizeIt();
+                    }
+
                     it.reset(dagPath, MItDag::kBreadthFirst, MFn::kJoint);
                     while(!it.isDone()) {
                         MDagPath jointPath;
                         it.getPath(jointPath);
 
-                        MFnIkJoint ikJnt(jointPath);
-                        MString hikJointName = ikJnt.hikJointName();
-                        std::cout << hikJointName.asChar() << "\n";
-                        // get rs bone from maya bone
-//                        actorObject
+                        QString jointPathString(jointPath.fullPathName().asChar());
+                        // this name contains character name CHARNAME_BONENAME
+                        QString jointName = jointPathString.split("|", QString::SkipEmptyParts).takeLast();
+                        QString mayaBoneName = jointName.split("_").takeLast();
+                        // find rs bone based on joint name
+                        if(mayaToRsBoneNames.contains(mayaBoneName)) {
+                            QJsonObject rsBoneObject = actorObject[mayaToRsBoneNames[mayaBoneName]].toObject();
+                            QJsonObject rsBonePosObject = rsBoneObject["position"].toObject();
+                            QJsonObject rsBoneQuatObject = rsBoneObject["rotation"].toObject();
+
+
+                            // convert rs transform to maya transform
+                            MVector boneLocation = Utils::rsToMaya(MVector(rsBonePosObject["x"].toDouble(),
+                                                                           rsBonePosObject["y"].toDouble(),
+                                                                           rsBonePosObject["z"].toDouble())) * sceneScale();
+
+                            // consider hips parent object TR
+                            boneLocation = boneLocation.rotateBy(referenceQuat);
+                            boneLocation += referenceOffset;
+
+                            MQuaternion boneQuat = Utils::rsToMaya(MQuaternion(rsBoneQuatObject["x"].toDouble(),
+                                                                               rsBoneQuatObject["y"].toDouble(),
+                                                                               rsBoneQuatObject["z"].toDouble(),
+                                                                               rsBoneQuatObject["w"].toDouble()));
+
+                            // aply converted transform to maya joint
+                            MFnTransform fnTr(jointPath);
+                            fnTr.setTranslation(boneLocation, MSpace::kWorld);
+                            fnTr.setRotation(boneQuat, MSpace::kWorld);
+                        }
+
 
                         it.next();
                     }

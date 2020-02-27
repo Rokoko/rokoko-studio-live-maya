@@ -1,13 +1,22 @@
-// create hik skeleton and definition
-hikCreateSkeleton();
-// rename
-string $currentCharacterName = hikGetCurrentCharacter();
-rename $currentCharacterName "ACTOR_ID";
-hikSetCurrentCharacter("ACTOR_ID");
-hikRenameConnectedNodes("ACTOR_ID", $currentCharacterName);
-if ( hikIsCharacterizationToolUICmdPluginLoaded() )
-{
-    hikUpdateCharacterList();
-    hikUpdateSourceList();
-    hikUpdateContextualUI();
+proc string rkk_createHikActor() {
+    string $sceneChars[] = hikGetSceneCharacters();
+
+    if(!stringArrayContains("ACTOR_ID", $sceneChars)) {
+        // create hik skeleton and definition
+        hikCreateSkeleton();
+        // rename
+        string $currentCharacterName = hikGetCurrentCharacter();
+        rename $currentCharacterName "ACTOR_ID";
+        hikSetCurrentCharacter("ACTOR_ID");
+        hikRenameConnectedNodes("ACTOR_ID", $currentCharacterName);
+        if ( hikIsCharacterizationToolUICmdPluginLoaded() )
+        {
+            hikUpdateCharacterList();
+            hikUpdateSourceList();
+            hikUpdateContextualUI();
+        }
+        return "1";
+    }
+    return "0";
 }
+rkk_createHikActor();

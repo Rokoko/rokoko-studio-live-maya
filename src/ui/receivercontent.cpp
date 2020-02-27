@@ -53,6 +53,7 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     sceneScaleBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     sceneScaleBox->setAlignment(Qt::AlignCenter);
     sceneScaleBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    sceneScaleBox->setRange(-100000, 100000);
     connect(sceneScaleBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double value) {
         Animations::get()->setSceneScale(value);
     });
@@ -164,9 +165,20 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
             });
 
             menu.addAction("Map to active character", [=](){
-                if(!Mapping::get()->mapActorToCurrentMayaCharacter(itemId)) {
-                    Utils::spawnMayaError("Failed to map character!");
-                }
+                Mapping::get()->mapActorToCurrentMayaCharacter(itemId);
+            });
+
+            menu.addAction("Unmap current character", [=](){
+                QString charChar = Mapping::get()->getCurrentMayaCharacter();
+                Mapping::get()->unmapMayaObjectByName(QString("%1_Hips").arg(charChar));
+            });
+
+            menu.addAction("Unmap all", [=](){
+                Mapping::get()->unmapRSObject(itemId, false);
+            });
+
+            menu.addAction("Select character", [=](){
+                Mapping::get()->selectObjects(itemId);
             });
         }
 

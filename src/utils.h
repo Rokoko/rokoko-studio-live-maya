@@ -12,7 +12,6 @@ public:
     static void mayaPrintMessage(QString message);
     static MVector rsToMaya(MVector);
     static MQuaternion rsToMaya(MQuaternion);
-
 };
 
 
