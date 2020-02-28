@@ -25,7 +25,7 @@ _Mapping::_Mapping()
     // torso
     boneMapping["Hips"] = "hip";
     boneMapping["Spine"] = "spine";
-    boneMapping["Spine2"] = "chest";
+    boneMapping["Spine1"] = "chest";
     boneMapping["Neck"] = "neck";
     boneMapping["Head"] = "head";
 
