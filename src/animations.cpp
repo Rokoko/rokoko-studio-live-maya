@@ -163,36 +163,32 @@ void _Animations::applyAnimationsToMappedObjects()
                             MVector boneLocation = Utils::rsToMaya(MVector(rsBonePosObject["x"].toDouble(),
                                                                            rsBonePosObject["y"].toDouble(),
                                                                            rsBonePosObject["z"].toDouble())) * sceneScale();
-
-                            // consider hips parent object TR
-                            boneLocation = boneLocation.rotateBy(referenceQuat);
-                            boneLocation += referenceOffset;
-
                             MQuaternion boneQuat = Utils::rsToMaya(MQuaternion(rsBoneQuatObject["x"].toDouble(),
                                                                                rsBoneQuatObject["y"].toDouble(),
                                                                                rsBoneQuatObject["z"].toDouble(),
                                                                                rsBoneQuatObject["w"].toDouble()));
 
                             // convert rs joint world matrix into parent bone space
-//                            MFnDagNode jointNode(jointPath);
-//                            MObject parentJointObj = jointNode.parent(0);
-//                            MDagPath parentJointPath;
-//                            MDagPath::getAPathTo(parentJointObj, parentJointPath);
-//                            MMatrix parentMatrixInverse = parentJointPath.inclusiveMatrixInverse();
+                            MFnDagNode jointNode(jointPath);
+                            MObject parentJointObj = jointNode.parent(0);
+                            MDagPath parentJointPath;
+                            MDagPath::getAPathTo(parentJointObj, parentJointPath);
+                            MMatrix parentMatrixInverse = parentJointPath.inclusiveMatrixInverse();
 
-//                            MTransformationMatrix jointWorldTr(MMatrix::identity);
-//                            jointWorldTr.setTranslation(boneLocation, MSpace::kWorld);
-//                            jointWorldTr.setRotationQuaternion(boneQuat.x, boneQuat.y, boneQuat.z, boneQuat.w);
+                            MTransformationMatrix jointWorldTr(MMatrix::identity);
+                            jointWorldTr.setTranslation(boneLocation, MSpace::kWorld);
+                            jointWorldTr.setRotationQuaternion(boneQuat.x, boneQuat.y, boneQuat.z, boneQuat.w);
 
-//                            MMatrix jointRelativeMatrix = jointWorldTr.asMatrix() * parentMatrixInverse;
-//                            MTransformationMatrix jointRelativeTransform(jointRelativeMatrix);
+                            MMatrix jointRelativeMatrix = jointWorldTr.asMatrix() * parentMatrixInverse;
+                            MTransformationMatrix jointRelativeTransform(jointRelativeMatrix);
                             // aply converted transform to maya joint
                             MFnTransform fnTr(jointPath);
                             fnTr.setTranslation(boneLocation, MSpace::kWorld);
 
-//                            MQuaternion relativeRotation;
-//                            jointRelativeTransform.getRotationQuaternion(relativeRotation.x, relativeRotation.y, relativeRotation.z, relativeRotation.w);
-                            fnTr.setRotation(boneQuat, MSpace::kWorld);
+                            MQuaternion relativeRotation;
+                            jointRelativeTransform.getRotationQuaternion(relativeRotation.x, relativeRotation.y, relativeRotation.z, relativeRotation.w);
+//                            fnTr.setRotation(boneQuat, MSpace::kWorld);
+                            fnTr.setRotation(relativeRotation, MSpace::kTransform);
                         }
 
 
