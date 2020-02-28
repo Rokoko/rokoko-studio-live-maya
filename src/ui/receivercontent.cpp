@@ -58,7 +58,7 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     connect(sceneScaleBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double value) {
         Animations::get()->setSceneScale(value);
     });
-    sceneScaleBox->setValue(1.0);
+    sceneScaleBox->setValue(100.0);
     formLayout->addRow("Scene scale:", sceneScaleBox);
     mainLayout->addLayout(formLayout);
 

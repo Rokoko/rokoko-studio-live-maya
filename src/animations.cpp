@@ -12,6 +12,7 @@
 #include <maya/MFnIkJoint.h>
 #include <maya/MDagPath.h>
 #include <maya/MItDag.h>
+#include <maya/MMatrix.h>
 
 #ifdef _WINDOWS
     #pragma comment(lib,"OpenMayaAnim.lib")
@@ -172,9 +173,25 @@ void _Animations::applyAnimationsToMappedObjects()
                                                                                rsBoneQuatObject["z"].toDouble(),
                                                                                rsBoneQuatObject["w"].toDouble()));
 
+                            // convert rs joint world matrix into parent bone space
+//                            MFnDagNode jointNode(jointPath);
+//                            MObject parentJointObj = jointNode.parent(0);
+//                            MDagPath parentJointPath;
+//                            MDagPath::getAPathTo(parentJointObj, parentJointPath);
+//                            MMatrix parentMatrixInverse = parentJointPath.inclusiveMatrixInverse();
+
+//                            MTransformationMatrix jointWorldTr(MMatrix::identity);
+//                            jointWorldTr.setTranslation(boneLocation, MSpace::kWorld);
+//                            jointWorldTr.setRotationQuaternion(boneQuat.x, boneQuat.y, boneQuat.z, boneQuat.w);
+
+//                            MMatrix jointRelativeMatrix = jointWorldTr.asMatrix() * parentMatrixInverse;
+//                            MTransformationMatrix jointRelativeTransform(jointRelativeMatrix);
                             // aply converted transform to maya joint
                             MFnTransform fnTr(jointPath);
                             fnTr.setTranslation(boneLocation, MSpace::kWorld);
+
+//                            MQuaternion relativeRotation;
+//                            jointRelativeTransform.getRotationQuaternion(relativeRotation.x, relativeRotation.y, relativeRotation.z, relativeRotation.w);
                             fnTr.setRotation(boneQuat, MSpace::kWorld);
                         }
 
