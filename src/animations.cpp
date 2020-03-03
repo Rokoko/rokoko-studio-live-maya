@@ -68,6 +68,7 @@ void _Animations::applyAnimationsToMappedObjects()
 {
     const QMultiMap<QString, MObject> objectMapping = Mapping::get()->getObjectMapping();
     const QHash<QString, QString> mayaToRsBoneNames = Mapping::get()->getBoneMapping();
+    const QHash<QString, MQuaternion> studioTPose = Mapping::get()->getStudioTPose();
 
     struct Local {
         static void animatePropOrTracker(QJsonObject obj, MDagPath dagPath) {
@@ -154,43 +155,34 @@ void _Animations::applyAnimationsToMappedObjects()
                         QString mayaBoneName = jointName.split("_").takeLast();
                         // find rs bone based on joint name
                         if(mayaToRsBoneNames.contains(mayaBoneName)) {
-                            QJsonObject rsBoneObject = actorObject[mayaToRsBoneNames[mayaBoneName]].toObject();
+                            QString rsBoneName = mayaToRsBoneNames[mayaBoneName];
+                            QJsonObject rsBoneObject = actorObject[rsBoneName].toObject();
                             QJsonObject rsBonePosObject = rsBoneObject["position"].toObject();
                             QJsonObject rsBoneQuatObject = rsBoneObject["rotation"].toObject();
 
+                            MQuaternion studioTposeRot = MQuaternion::identity;
+                            if(studioTPose.contains(rsBoneName))
+                            {
+                                studioTposeRot = Utils::rsToMaya(studioTPose[rsBoneName]);
+                            }
 
                             // convert rs transform to maya transform
                             MVector boneLocation = Utils::rsToMaya(MVector(rsBonePosObject["x"].toDouble(),
                                                                            rsBonePosObject["y"].toDouble(),
                                                                            rsBonePosObject["z"].toDouble())) * sceneScale();
-                            MQuaternion boneQuat = Utils::rsToMaya(MQuaternion(rsBoneQuatObject["x"].toDouble(),
-                                                                               rsBoneQuatObject["y"].toDouble(),
-                                                                               rsBoneQuatObject["z"].toDouble(),
-                                                                               rsBoneQuatObject["w"].toDouble()));
+                            MQuaternion studioQuat = MQuaternion(rsBoneQuatObject["x"].toDouble(),
+                                                                 rsBoneQuatObject["y"].toDouble(),
+                                                                 rsBoneQuatObject["z"].toDouble(),
+                                                                 rsBoneQuatObject["w"].toDouble());
+                            MQuaternion boneQuat = Utils::rsToMaya(studioQuat);
 
-                            // convert rs joint world matrix into parent bone space
-                            MFnDagNode jointNode(jointPath);
-                            MObject parentJointObj = jointNode.parent(0);
-                            MDagPath parentJointPath;
-                            MDagPath::getAPathTo(parentJointObj, parentJointPath);
-                            MMatrix parentMatrixInverse = parentJointPath.inclusiveMatrixInverse();
-
-                            MTransformationMatrix jointWorldTr(MMatrix::identity);
-                            jointWorldTr.setTranslation(boneLocation, MSpace::kWorld);
-                            jointWorldTr.setRotationQuaternion(boneQuat.x, boneQuat.y, boneQuat.z, boneQuat.w);
-
-                            MMatrix jointRelativeMatrix = jointWorldTr.asMatrix() * parentMatrixInverse;
-                            MTransformationMatrix jointRelativeTransform(jointRelativeMatrix);
-                            // aply converted transform to maya joint
-                            MFnTransform fnTr(jointPath);
+                            MFnIkJoint fnTr(jointPath);
                             fnTr.setTranslation(boneLocation, MSpace::kWorld);
 
-                            MQuaternion relativeRotation;
-                            jointRelativeTransform.getRotationQuaternion(relativeRotation.x, relativeRotation.y, relativeRotation.z, relativeRotation.w);
-//                            fnTr.setRotation(boneQuat, MSpace::kWorld);
-                            fnTr.setRotation(relativeRotation, MSpace::kTransform);
+                            boneQuat = studioTposeRot.inverse() * boneQuat;
+                            boneQuat.normalizeIt();
+                            fnTr.setRotation(boneQuat, MSpace::kWorld);
                         }
-
 
                         it.next();
                     }

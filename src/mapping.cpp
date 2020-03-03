@@ -14,6 +14,7 @@
 #include <maya/MItSelectionList.h>
 #include <maya/MMessage.h>
 #include <maya/MSceneMessage.h>
+#include <maya/MAngle.h>
 
 
 const QString MAPPING_FILED_NAME = "RokokoMapping";
@@ -35,7 +36,7 @@ _Mapping::_Mapping()
     boneMapping["LeftForeArm"] = "leftLowerArm";
     boneMapping["LeftHand"] = "leftHand";
 
-    boneMapping["LeftHandThumb1"] = "leftThumbProximal";
+    /*boneMapping["LeftHandThumb1"] = "leftThumbProximal";
     boneMapping["LeftHandThumb2"] = "leftThumbMedial";
     boneMapping["LeftHandThumb3"] = "leftThumbDistal";
     boneMapping["LeftHandThumb4"] = "leftThumbTip";
@@ -58,7 +59,7 @@ _Mapping::_Mapping()
     boneMapping["LeftHandPinky1"] = "leftLittleProximal";
     boneMapping["LeftHandPinky2"] = "leftLittleMedial";
     boneMapping["LeftHandPinky3"] = "leftLittleDistal";
-    boneMapping["LeftHandPinky4"] = "leftLittleTip";
+    boneMapping["LeftHandPinky4"] = "leftLittleTip";*/
 
 
     // right hand
@@ -67,7 +68,7 @@ _Mapping::_Mapping()
     boneMapping["RightForeArm"] = "rightLowerArm";
     boneMapping["RightHand"] = "rightHand";
 
-    boneMapping["RightHandThumb1"] = "rightThumbProximal";
+    /*boneMapping["RightHandThumb1"] = "rightThumbProximal";
     boneMapping["RightHandThumb2"] = "rightThumbMedial";
     boneMapping["RightHandThumb3"] = "rightThumbDistal";
     boneMapping["RightHandThumb4"] = "rightThumbTip";
@@ -90,7 +91,7 @@ _Mapping::_Mapping()
     boneMapping["RightHandPinky1"] = "rightLittleProximal";
     boneMapping["RightHandPinky2"] = "rightLittleMedial";
     boneMapping["RightHandPinky3"] = "rightLittleDistal";
-    boneMapping["RightHandPinky4"] = "rightLittleTip";
+    boneMapping["RightHandPinky4"] = "rightLittleTip";*/
 
     // left leg
     boneMapping["LeftUpLeg"] = "leftUpLeg";
@@ -106,6 +107,33 @@ _Mapping::_Mapping()
     boneMapping["RightToeBase"] = "rightToe";
     //    boneMapping["??"] = "rightToeEnd";
 
+
+    // TPose
+    studioTPose["hip"] = MQuaternion(0.00, 0.00, 0.00, 1.00);
+    studioTPose["spine"] = MQuaternion(-0.00, 0.00, -1.00, 0.00);
+    studioTPose["chest"] = MQuaternion(-0.00, -0.00, 1.00, 0.00);
+    studioTPose["neck"] = MQuaternion(-0.00, 0.00, -1.00, 0.00);
+    studioTPose["head"] = MQuaternion(-0.00, -0.00, 1.00, 0.00);
+
+    studioTPose["leftShoulder"] = MQuaternion(0.000, 0.000, -0.707, 0.707);
+    studioTPose["leftUpperArm"] = MQuaternion(0.500, 0.500, -0.500, 0.500);
+    studioTPose["leftLowerArm"] = MQuaternion(0.500, 0.500, -0.500, 0.500);
+    studioTPose["leftHand"] = MQuaternion(0.500, 0.500, -0.500, 0.500);
+
+    studioTPose["rightShoulder"] = MQuaternion(0.000, -0.000, 0.707, 0.707);
+    studioTPose["rightUpperArm"] = MQuaternion(0.500, -0.500, 0.500, 0.500);
+    studioTPose["rightLowerArm"] = MQuaternion(0.500, -0.500, 0.500, 0.500);
+    studioTPose["rightHand"] = MQuaternion(0.500, -0.500, 0.500, 0.500);
+
+    studioTPose["leftUpLeg"] = MQuaternion(-0.000, 0.707, 0.000, 0.707);
+    studioTPose["leftLeg"] = MQuaternion(-0.000, 0.707, 0.000, 0.707);
+    studioTPose["leftFoot"] = MQuaternion(-0.000, 0.707, -0.707, 0.000);
+    studioTPose["leftToe"] = MQuaternion(-0.000, 0.707, -0.707, 0.000);
+
+    studioTPose["rightUpLeg"] = MQuaternion(-0.000, -0.707, -0.000, 0.707);
+    studioTPose["rightLeg"] = MQuaternion(-0.000, -0.707, -0.000, 0.707);
+    studioTPose["rightFoot"] = MQuaternion(-0.000, 0.707, -0.707, 0.000);
+    studioTPose["rightToe"] = MQuaternion(0.000, 0.707, -0.707, 0.000);
 
     // register callbacks
     MCallbackId beforeNewId = MSceneMessage::addCheckCallback(MSceneMessage::kBeforeNewCheck, [](bool* recCode, void* clientData) {
@@ -351,4 +379,9 @@ const QMultiMap<QString, MObject> &_Mapping::getObjectMapping()
 const QHash<QString, QString> &_Mapping::getBoneMapping()
 {
     return boneMapping;
+}
+
+const QHash<QString, MQuaternion> &_Mapping::getStudioTPose()
+{
+    return studioTPose;
 }

@@ -3,6 +3,7 @@
 
 #include "singleton.h"
 #include <maya/MObject.h>
+#include <maya/MQuaternion.h>
 #include <maya/MCallbackIdArray.h>
 #include <QMultiMap>
 #include <QHash>
@@ -36,11 +37,14 @@ public:
 
     const QMultiMap<QString, MObject> &getObjectMapping();
     const QHash<QString, QString> &getBoneMapping();
+    const QHash<QString, MQuaternion> &getStudioTPose();
 private:
     // prop id - maya object
     QMultiMap<QString, MObject> objectsMap;
     // maya hik bone name to rs bone name
     QHash<QString, QString> boneMapping;
+    // studio t-pose
+    QHash<QString, MQuaternion> studioTPose;
 
     MCallbackIdArray callbacks;
 };
