@@ -280,7 +280,7 @@ bool _Mapping::mapActorToCurrentMayaCharacter(QString actorID)
     QString hipsBoneName = QString("%1_Hips").arg(activeCharacterName);
     MStatus hipsFound = MGlobal::getSelectionListByName(MString(hipsBoneName.toStdString().c_str()), hipsLs);
     if(hipsFound != MStatus::kSuccess) {
-        Utils::spawnMayaError(QString("Hips not found! %1").arg(hipsBoneName));
+        Utils::spawnMayaError(QString("Unable to map character! %1").arg(activeCharacterName));
         return false;
     }
     MObject hipsObject;
@@ -305,19 +305,7 @@ void _Mapping::unmapMayaObjectByName(QString mayaObjecName)
     cmdString.replace("MAYA_OBJECT_NAME", mayaObjecName);
     MGlobal::executeCommand(cmdString.toStdString().c_str());
 
-    // find MObject by name
-    MSelectionList ls;
-    MStatus objectFound = MGlobal::getSelectionListByName(MString(mayaObjecName.toStdString().c_str()), ls);
-    if(objectFound == MStatus::kSuccess) {
-        MObject mayaObject;
-        ls.getDependNode(0, mayaObject);
-        QString currentCharacterName = getCurrentMayaCharacter();
-        std::cout << objectsMap.count() << " before\n";
-        objectsMap.remove(currentCharacterName, mayaObject);
-        std::cout << objectsMap.count() << " after\n";
-    } else {
-        std::cout << "object not found " << mayaObjecName.toStdString().c_str() << "\n";
-    }
+    syncMapping();
 
 }
 

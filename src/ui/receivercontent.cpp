@@ -7,6 +7,7 @@
 
 #include <QThread>
 #include <QVBoxLayout>
+#include <QInputDialog>
 #include <QHBoxLayout>
 #include <QFormLayout>
 #include <QTreeWidget>
@@ -19,6 +20,7 @@
 #include <QMenu>
 
 #include <maya/MSceneMessage.h>
+#include <maya/MFnDagNode.h>
 
 
 enum class RSObjectType : uint8_t {
@@ -187,16 +189,33 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
                 Mapping::get()->mapActorToCurrentMayaCharacter(itemId);
             });
 
-            menu.addAction("Unmap current character", [=](){
-                QString charChar = Mapping::get()->getCurrentMayaCharacter();
-                Mapping::get()->unmapMayaObjectByName(QString("%1_Hips").arg(charChar));
-            });
+            menu.addAction("Unmap character", [&](){
+                QString currentChar = treeWidget->currentItem()->text(0);
+                // check if more than 1 character mapped and prompt dialog with selection
+                auto objectMapping = Mapping::get()->getObjectMapping();
+                int count = objectMapping.count(currentChar);
+                if (count > 1) {
+                    auto it = objectMapping.find(currentChar);
+                    QStringList mappedHipJoints;
+                    // populate mapped character root bones
+                    while(it != objectMapping.end() && it.key() == currentChar) {
+                        MFnDagNode node(it.value());
+                        QString temp(node.name().asChar());
+                        mappedHipJoints << temp.split("_").takeFirst();
+                        ++it;
+                    }
+                    QString selectedCharacter = QInputDialog::getItem(this, "Select character", "Select character to unmap", mappedHipJoints, 0, false);
+                    Mapping::get()->unmapMayaObjectByName(QString("%1_Hips").arg(selectedCharacter));
+                } else {
+                    Mapping::get()->unmapRSObject(itemId, false);
+                }
+             });
 
             menu.addAction("Unmap all", [=](){
                 Mapping::get()->unmapRSObject(itemId, false);
             });
 
-            menu.addAction("Select character", [=](){
+            menu.addAction("Select mapped skeletons", [=](){
                 Mapping::get()->selectObjects(itemId);
             });
         }
@@ -208,7 +227,7 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
 
 void ReceiverContent::populateTree()
 {
-    QTimer::singleShot(500, [&](){
+    QTimer::singleShot(250, [&](){
         // populate props
         auto props = Animations::get()->getProps();
         QHash<QString, QTreeWidgetItem*> propsItemMap;
