@@ -88,29 +88,16 @@ void _Animations::applyAnimationsToMappedObjects()
                                    rotationObject["z"].toDouble(),
                                    rotationObject["w"].toDouble());
 
-            MFnDagNode dagNode(dagPath);
-            MVector parentOffset;
-            MQuaternion parentQuat(MQuaternion::identity);
-            if(dagNode.parentCount() > 0) {
-                MObject parentObject = dagNode.parent(0);
-                MDagPath path;
-                MDagPath::getAPathTo(parentObject, path);
-                MFnTransform parentFnTransform(path);
-                parentOffset = parentFnTransform.getTranslation(MSpace::kWorld);
-                parentFnTransform.getRotation(parentQuat, MSpace::kWorld);
-                parentQuat.normalizeIt();
-            }
-
             // convert RS transform to Maya transform
             MVector mayaPosition = Utils::rsToMaya(rsPosition) * Animations::get()->sceneScale();
-            mayaPosition += parentOffset;
             MQuaternion mayaRotation = Utils::rsToMaya(rsRotation);
-            mayaRotation *= parentQuat;
+            MTransformationMatrix finalTransform(MTransformationMatrix::identity);
+            finalTransform.setTranslation(mayaPosition, MSpace::kWorld);
+            finalTransform.setRotationQuaternion(mayaRotation.x, mayaRotation.y, mayaRotation.z, mayaRotation.w);
 
             // apply converted transform onto mapped object
             MFnTransform fn(dagPath);
-            fn.setTranslation(mayaPosition, MSpace::kWorld);
-            fn.setRotation(mayaRotation, MSpace::kWorld);
+            fn.set(finalTransform);
         }
     };
 

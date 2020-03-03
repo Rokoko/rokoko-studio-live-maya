@@ -20,17 +20,11 @@ void Utils::mayaPrintMessage(QString message)
 
 MVector Utils::rsToMaya(MVector rsTranslation)
 {
-    if(MGlobal::isYAxisUp())
-        return MVector(-rsTranslation.x, rsTranslation.y, rsTranslation.z);
-    else
-        return MVector(-rsTranslation.x, -rsTranslation.z, rsTranslation.y);
+    return MVector(-rsTranslation.x, rsTranslation.y, rsTranslation.z);
 }
 
 MQuaternion Utils::rsToMaya(MQuaternion rsRotation)
 {
-    if(MGlobal::isYAxisUp())
-        return MQuaternion(-rsRotation.x, rsRotation.y, rsRotation.z, -rsRotation.w);
-    else
-        return MQuaternion(rsRotation.x, rsRotation.z, -rsRotation.y, rsRotation.w);
+    return MQuaternion(-rsRotation.x, rsRotation.y, rsRotation.z, -rsRotation.w);
 }
 
