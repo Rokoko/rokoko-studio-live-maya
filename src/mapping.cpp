@@ -138,9 +138,11 @@ _Mapping::_Mapping()
     // register callbacks
     MCallbackId beforeNewId = MSceneMessage::addCheckCallback(MSceneMessage::kBeforeNewCheck, [](bool* recCode, void* clientData) {
         Mapping::get()->clear();
+        *recCode = true;
     });
     MCallbackId beforeOpenId = MSceneMessage::addCheckCallback(MSceneMessage::kBeforeOpenCheck, [](bool* recCode, void* clientData) {
         Mapping::get()->clear();
+        *recCode = true;
     });
     callbacks.append(beforeNewId);
     callbacks.append(beforeOpenId);

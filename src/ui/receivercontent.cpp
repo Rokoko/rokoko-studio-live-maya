@@ -118,12 +118,14 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
         if(receiverWidget) {
             receiverWidget->reset();
         }
+        *recCode = true;
     }, this);
     MCallbackId beforeOpenId = MSceneMessage::addCheckCallback(MSceneMessage::kBeforeOpenCheck, [](bool* recCode, void* clientData) {
         ReceiverContent* receiverWidget = static_cast<ReceiverContent*>(clientData);
         if(receiverWidget) {
             receiverWidget->reset();
         }
+        *recCode = true;
     }, this);
     callbacks.append(beforeNewId);
     callbacks.append(beforeOpenId);
