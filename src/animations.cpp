@@ -163,23 +163,28 @@ void _Animations::applyAnimationsToMappedObjects()
                             MQuaternion studioTposeRot = MQuaternion::identity;
                             if(studioTPose.contains(rsBoneName))
                             {
+                                // convert studio T pose rotation into maya space
                                 studioTposeRot = Utils::rsToMaya(studioTPose[rsBoneName]);
                             }
 
                             // convert rs transform to maya transform
                             MVector boneLocation = Utils::rsToMaya(MVector(rsBonePosObject["x"].toDouble(),
                                                                            rsBonePosObject["y"].toDouble(),
-                                                                           rsBonePosObject["z"].toDouble())) * sceneScale();
-                            MQuaternion studioQuat = MQuaternion(rsBoneQuatObject["x"].toDouble(),
-                                                                 rsBoneQuatObject["y"].toDouble(),
-                                                                 rsBoneQuatObject["z"].toDouble(),
-                                                                 rsBoneQuatObject["w"].toDouble());
-                            MQuaternion boneQuat = Utils::rsToMaya(studioQuat);
+                                                                           rsBonePosObject["z"].toDouble()) * sceneScale());
+                            boneLocation = boneLocation.rotateBy(referenceQuat);
+                            boneLocation += referenceOffset;
+                            // convert studio rotation into maya space
+                            MQuaternion boneQuat = Utils::rsToMaya(MQuaternion(rsBoneQuatObject["x"].toDouble(),
+                                                                   rsBoneQuatObject["y"].toDouble(),
+                                                                   rsBoneQuatObject["z"].toDouble(),
+                                                                   rsBoneQuatObject["w"].toDouble()));
 
                             MFnIkJoint fnTr(jointPath);
                             fnTr.setTranslation(boneLocation, MSpace::kWorld);
 
+                            // calc final rotation
                             boneQuat = studioTposeRot.inverse() * boneQuat;
+                            boneQuat *= referenceQuat;
                             boneQuat.normalizeIt();
                             fnTr.setRotation(boneQuat, MSpace::kWorld);
                         }
