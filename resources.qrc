@@ -20,5 +20,8 @@
         <file>resources/mapToSelectedObjects.mel</file>
         <file>resources/unmapRSObject.mel</file>
         <file>resources/selectMappedObjects.mel</file>
+        <file>resources/createHIKForActor.mel</file>
+        <file>resources/setOrCreateRSIdAttribute.mel</file>
+        <file>resources/deleteMappingAttribute.mel</file>
     </qresource>
 </RCC>

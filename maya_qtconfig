@@ -17,7 +17,7 @@ TEMPLATE = lib
 CONFIG += qt warn_on release plugin
 
 # MAYA LIBS
-LIBS		+= -L"$$(DEVKIT_LOCATION)\lib" -lOpenMaya -lOpenMayaUI -lFoundation -lOpenMayaRender -IOpenMayaAnim
+LIBS		+= -L"$$(DEVKIT_LOCATION)\lib" -lOpenMaya -lOpenMayaUI -lFoundation
 
 
 DEFINES		+= NDEBUG _WINDOWS NT_PLUGIN

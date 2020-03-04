@@ -82,7 +82,7 @@ void DataReceivingWorker::start(int port) {
     }
 }
 
-void DataReceivingWorker::readData() {
+void DataReceivingWorker::readAndApplyData() {
 
     if(socket->state() != QAbstractSocket::SocketState::BoundState) {
         emit workerStateChanged("Socket not connected!");
@@ -124,8 +124,5 @@ void DataReceivingWorker::readData() {
 
 void DataReceivingWorker::onHearBeat()
 {
-    readData();
+    readAndApplyData();
 }
-
-
-

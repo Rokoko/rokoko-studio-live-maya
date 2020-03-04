@@ -3,11 +3,11 @@
 #include "animations.h"
 #include "mapping.h"
 #include "utils.h"
-#include "ui/button.h"
 #include "ui/recordbutton.h"
 
 #include <QThread>
 #include <QVBoxLayout>
+#include <QInputDialog>
 #include <QHBoxLayout>
 #include <QFormLayout>
 #include <QTreeWidget>
@@ -18,6 +18,17 @@
 #include <QJsonArray>
 #include <QTimer>
 #include <QMenu>
+
+#include <maya/MSceneMessage.h>
+#include <maya/MFnDagNode.h>
+
+
+enum class RSObjectType : uint8_t {
+    PROP = 0,
+    TRACKER,
+    FACE,
+    ACTOR
+};
 
 
 ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
@@ -45,10 +56,11 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     sceneScaleBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     sceneScaleBox->setAlignment(Qt::AlignCenter);
     sceneScaleBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    sceneScaleBox->setRange(-100000, 100000);
     connect(sceneScaleBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double value) {
         Animations::get()->setSceneScale(value);
     });
-    sceneScaleBox->setValue(1.0);
+    sceneScaleBox->setValue(100.0);
     formLayout->addRow("Scene scale:", sceneScaleBox);
     mainLayout->addLayout(formLayout);
 
@@ -69,7 +81,7 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     receiverBtnParams.uncheckedStateText = "Start Receiver";
     receiverBtnParams.iconAlignment = Qt::AlignLeft;
 
-    Button* startReceiverBtn = new Button(this, receiverBtnParams);
+    startReceiverBtn = new Button(this, receiverBtnParams);
     startReceiverBtn->setCheckable(true);
     mainLayout->addWidget(startReceiverBtn);
     connect(startReceiverBtn, &Button::toggled, this, &ReceiverContent::onReceiveToggled);
@@ -98,11 +110,33 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
         statusLabel->setText(status);
     });
     connect(worker, &DataReceivingWorker::onSocketConnected, this, &ReceiverContent::populateTree);
+
+    // register scene callbacks
+    // register callbacks
+    MCallbackId beforeNewId = MSceneMessage::addCheckCallback(MSceneMessage::kBeforeNewCheck, [](bool* recCode, void* clientData) {
+        ReceiverContent* receiverWidget = static_cast<ReceiverContent*>(clientData);
+        if(receiverWidget) {
+            receiverWidget->reset();
+        }
+        *recCode = true;
+    }, this);
+    MCallbackId beforeOpenId = MSceneMessage::addCheckCallback(MSceneMessage::kBeforeOpenCheck, [](bool* recCode, void* clientData) {
+        ReceiverContent* receiverWidget = static_cast<ReceiverContent*>(clientData);
+        if(receiverWidget) {
+            receiverWidget->reset();
+        }
+        *recCode = true;
+    }, this);
+    callbacks.append(beforeNewId);
+    callbacks.append(beforeOpenId);
 }
 
 ReceiverContent::~ReceiverContent()
 {
     worker->pause();
+    for(MCallbackId id : callbacks) {
+        MSceneMessage::removeCallback(id);
+    }
 }
 
 
@@ -112,9 +146,7 @@ void ReceiverContent::onReceiveToggled(bool checked)
     {
         worker->start(portBox->value());
     } else {
-        worker->pause();
-        clearTreeWidget();
-        statusLabel->setText("");
+        reset();
     }
 }
 
@@ -124,23 +156,72 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
     if(item) {
         QString itemlabel = item->text(0);
         QString itemId = item->data(0, Qt::UserRole).toString();
+        RSObjectType itemType = static_cast<RSObjectType>(item->data(1, Qt::UserRole).toInt());
 
         // this item can't be mapped
         if(itemId.isEmpty()) return;
 
+        // check item type and create special menus for actors
+        // ...
+
+
         QMenu menu(this);
-        menu.addAction("Map to selected objects", [=](){
-            Mapping::get()->mapRSObjectToSelection(itemId);
-        });
-        menu.addAction("Unmap selected objects", [=](){
-            Mapping::get()->unmapRSObject(itemId, true);
-        });
-        menu.addAction("Unmap all", [=](){
-            Mapping::get()->unmapRSObject(itemId, false);
-        });
-        menu.addAction("Select objects", [=](){
-            Mapping::get()->selectObjects(itemId);
-        });
+        if(itemType == RSObjectType::PROP || itemType == RSObjectType::TRACKER) {
+            menu.addAction("Map to selected objects", [=](){
+                Mapping::get()->mapRSObjectToSelection(itemId);
+            });
+            menu.addAction("Unmap selected objects", [=](){
+                Mapping::get()->unmapRSObject(itemId, true);
+            });
+            menu.addAction("Unmap all", [=](){
+                Mapping::get()->unmapRSObject(itemId, false);
+            });
+            menu.addAction("Select objects", [=](){
+                Mapping::get()->selectObjects(itemId);
+            });
+        }
+
+        if(itemType == RSObjectType::ACTOR)
+        {
+            menu.addAction("Create HIK skeleton", [=](){
+                Mapping::get()->createHIKForActor(itemId);
+            });
+
+            menu.addAction("Map to active character", [=](){
+                Mapping::get()->mapActorToCurrentMayaCharacter(itemId);
+            });
+
+            menu.addAction("Unmap character", [&](){
+                QString currentChar = treeWidget->currentItem()->text(0);
+                // check if more than 1 character mapped and prompt dialog with selection
+                auto objectMapping = Mapping::get()->getObjectMapping();
+                int count = objectMapping.count(currentChar);
+                if (count > 1) {
+                    auto it = objectMapping.find(currentChar);
+                    QStringList mappedHipJoints;
+                    // populate mapped character root bones
+                    while(it != objectMapping.end() && it.key() == currentChar) {
+                        MFnDagNode node(it.value());
+                        QString temp(node.name().asChar());
+                        mappedHipJoints << temp.split("_").takeFirst();
+                        ++it;
+                    }
+                    QString selectedCharacter = QInputDialog::getItem(this, "Select character", "Select character to unmap", mappedHipJoints, 0, false);
+                    Mapping::get()->unmapMayaObjectByName(QString("%1_Hips").arg(selectedCharacter));
+                } else {
+                    Mapping::get()->unmapRSObject(itemId, false);
+                }
+             });
+
+            menu.addAction("Unmap all", [=](){
+                Mapping::get()->unmapRSObject(itemId, false);
+            });
+
+            menu.addAction("Select mapped skeletons", [=](){
+                Mapping::get()->selectObjects(itemId);
+            });
+        }
+
         menu.exec(treeWidget->mapToGlobal(pos));
     }
 
@@ -148,7 +229,7 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
 
 void ReceiverContent::populateTree()
 {
-    QTimer::singleShot(500, [&](){
+    QTimer::singleShot(250, [&](){
         // populate props
         auto props = Animations::get()->getProps();
         QHash<QString, QTreeWidgetItem*> propsItemMap;
@@ -158,6 +239,7 @@ void ReceiverContent::populateTree()
             propItem->setIcon(0, QIcon(":/resources/cube.png"));
             // put rs object id into user data, to e used by context menu
             propItem->setData(0, Qt::UserRole, QVariant(prop["id"].toString()));
+            propItem->setData(1, Qt::UserRole, QVariant((int)RSObjectType::PROP));
             propsItemMap[prop["id"].toString()] = propItem;
         }
 
@@ -177,6 +259,8 @@ void ReceiverContent::populateTree()
             actorItem->setIcon(0, QIcon(":/resources/icon-row-suit-32.png"));
             // put rs object id into user data, to e used by context menu
             actorItem->setData(0, Qt::UserRole, QVariant(actor["id"].toString()));
+            actorItem->setData(1, Qt::UserRole, QVariant((int)RSObjectType::ACTOR));
+
             actorsMap[actor["id"].toString()] = actorItem;
         }
 
@@ -195,6 +279,7 @@ void ReceiverContent::populateTree()
             faceItem->setText(0, faceId);
             faceItem->setIcon(0, QIcon(":/resources/icon-row-face-32.png"));
             faceItem->setData(0, Qt::UserRole, QVariant(faceId));
+            faceItem->setData(1, Qt::UserRole, QVariant((int)RSObjectType::FACE));
             assert(faceItem != nullptr);
         }
 
@@ -214,6 +299,7 @@ void ReceiverContent::populateTree()
             trackerItem->setText(0, trackerId);
             trackerItem->setIcon(0, QIcon(":/resources/icon-vp-32.png"));
             trackerItem->setData(0, Qt::UserRole, QVariant(trackerId));
+            trackerItem->setData(1, Qt::UserRole, QVariant((int)RSObjectType::TRACKER));
         }
 
         treeWidget->expandAll();
@@ -226,5 +312,14 @@ void ReceiverContent::populateTree()
 void ReceiverContent::clearTreeWidget()
 {
     treeWidget->clear();
+}
+
+void ReceiverContent::reset()
+{
+    worker->pause();
+    clearTreeWidget();
+    statusLabel->setText("");
+    startReceiverBtn->setChecked(false);
+
 }
 
