@@ -1,0 +1,10 @@
+proc string getConnectedBlendShapes(string $targetNode, string $separator) {
+    if(!`objExists $targetNode`) {
+        return "";
+    }
+    string $connections[] = `listHistory -bf $targetNode`;
+    string $bsNodes[] = `ls -type "blendShape" $connections`;
+
+    return stringArrayToString($bsNodes, $separator);
+}
+getConnectedBlendShapes("MAYA_OBJECT_NAME", "SEPARATOR");

@@ -107,6 +107,12 @@ void _Animations::applyAnimationsToMappedObjects()
         if(it != objectMapping.end()) {
             while(it != objectMapping.end()) {
                 QString rsId = it.key();
+
+                if(rsId.isEmpty()) {
+                    ++it;
+                    continue;
+                }
+
                 MObject object = it.value();
                 MDagPath dagPath;
                 MDagPath::getAPathTo(object, dagPath);
@@ -122,6 +128,7 @@ void _Animations::applyAnimationsToMappedObjects()
                 // apply faces animations
                 } else if(facesMap.contains(rsId)) {
                 // apply actor animations
+
                 } else if(actorsMap.contains(rsId)) {
                     QJsonObject actorObject = actorsMap[rsId];
 
@@ -194,10 +201,12 @@ void _Animations::applyAnimationsToMappedObjects()
                     }
 
                 } else {
-                    // this should never happen
-                    std::cout << "MAPPED OBJECTS NOT FOUND IN DATA STREAM!!!!\n";
-                }
+                    // this block executes only if rsId is not found in mapped objects
+                    // for example user opened maya scene that doesn't corresponds to opened studio project
+                    // TODO: tell user about problematic objects
 
+//                    std::cout << "MAPPED OBJECTS NOT FOUND IN DATA STREAM!!!!\n";
+                }
 
                 ++it;
             }

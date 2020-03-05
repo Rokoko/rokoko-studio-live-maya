@@ -10,14 +10,18 @@
 #include <maya/MPlug.h>
 #include <maya/MSelectionList.h>
 #include <maya/MFnDependencyNode.h>
+#include <maya/MFnCompoundAttribute.h>
+#include <maya/MFnTypedAttribute.h>
 #include <maya/MItDependencyNodes.h>
 #include <maya/MItSelectionList.h>
 #include <maya/MMessage.h>
 #include <maya/MSceneMessage.h>
 #include <maya/MAngle.h>
+#include <maya/MPlug.h>
 
 
 const QString MAPPING_FILED_NAME = "RokokoMapping";
+const QString FACE_MAPPING_FILED_NAME = "RokokoFaceMapping";
 
 
 
@@ -267,6 +271,41 @@ void _Mapping::syncMapping()
         }
         nodesIt.next();
     }
+
+    // iterate over all blend shape nodes
+    MItDependencyNodes bsIt(MFn::kBlendShape);
+    while(!bsIt.isDone()) {
+        MObject object = bsIt.item();
+        MFnDependencyNode fn(object);
+        MString faceMappingAttributeName(FACE_MAPPING_FILED_NAME.toStdString().c_str());
+        bool mappingFound = fn.hasAttribute(faceMappingAttributeName);
+        if(mappingFound) {
+            // get rs id
+            MFnDependencyNode bsFn(object);
+            MPlug faceMappingPlug = bsFn.findPlug(FACE_MAPPING_FILED_NAME.toStdString().c_str());
+            if (!faceMappingPlug.isNull()) {
+                if(faceMappingPlug.isCompound()) {
+                    unsigned int numChildren = faceMappingPlug.numChildren();
+                    MPlug faceIdPlug;
+                    for (unsigned int i = 0; i < numChildren; ++i) {
+                        MPlug childPlug = faceMappingPlug.child(i);
+                        if(childPlug.partialName() == "FaceId") {
+                            faceIdPlug = childPlug;
+                            break;
+                        }
+                    }
+                    if(!faceIdPlug.isNull())
+                    {
+                        MString faceId = faceIdPlug.asString();
+                        objectsMap.insert(faceId.asChar(), object);
+                        std::cout << "sync face: " << faceId.asChar() << "\n";
+                    }
+                }
+            }
+        }
+
+        bsIt.next();
+    }
 }
 
 bool _Mapping::mapActorToCurrentMayaCharacter(QString actorID)
@@ -278,6 +317,7 @@ bool _Mapping::mapActorToCurrentMayaCharacter(QString actorID)
         return false;
     }
     // find hips joint by character name and NAME_Hips pattern
+    // TODO: check if namespace break this
     MSelectionList hipsLs;
     QString hipsBoneName = QString("%1_Hips").arg(activeCharacterName);
     MStatus hipsFound = MGlobal::getSelectionListByName(MString(hipsBoneName.toStdString().c_str()), hipsLs);
@@ -348,10 +388,86 @@ QString _Mapping::getCurrentMayaCharacter()
     return QString(currentCharacterName.asChar());
 }
 
+void _Mapping::mapFaceToMayaObject(QString mayaObjecName, QString rsId)
+{
+    // first grab object ref
+    MSelectionList ls;
+    MGlobal::getSelectionListByName(mayaObjecName.toStdString().c_str(), ls);
+
+    if(ls.length() == 0)
+        return;
+
+    MObject object;
+    ls.getDependNode(0, object);
+    MFnDependencyNode fn(object);
+
+    // fetch selected node connected blendshapes
+    QFile cmdFile(":/resources/fetchBlendShapes.mel");
+    cmdFile.open(QFile::ReadOnly);
+    QString cmdString = cmdFile.readAll();
+    cmdFile.close();
+    cmdString.replace("MAYA_OBJECT_NAME", fn.name().asChar());
+    QString sep("3996e3a0");
+    cmdString.replace("SEPARATOR", sep);
+    MString connectedBlendShapes = MGlobal::executeCommandStringResult(cmdString.toStdString().c_str());
+    QStringList blendShapesList = QString(connectedBlendShapes.asChar()).split(sep);
+
+    // for each blendshape
+    // creafe face attributes
+    for(QString bsNodeName : blendShapesList) {
+        MSelectionList bsls;
+        MGlobal::getSelectionListByName(bsNodeName.toStdString().c_str(), bsls);
+
+        if(bsls.length() == 0)
+            return;
+
+        MObject object;
+        bsls.getDependNode(0, object);
+        MFnDependencyNode fnBs(object);
+
+        // create compound attribute
+        MFnCompoundAttribute compound;
+        compound.setKeyable(false);
+        compound.setStorable(true);
+        compound.setWritable(true);
+        compound.setReadable(true);
+        MObject compoundObj = compound.create("RokokoFaceMapping", "RokokoFaceMapping");
+
+        // create face id attribute
+        MFnTypedAttribute faceIdAttr;
+        MObject faceIdObject = faceIdAttr.create("FaceId", "FaceId", MFnData::kString);
+        compound.addChild(faceIdObject);
+
+        // create shapes string attributes
+        // ...
+
+        fnBs.addAttribute(compoundObj);
+    }
+
+    syncMapping();
+}
+
+void _Mapping::unmapFaceFromMayaObject(QString mayaObjecName)
+{
+    MItDependencyNodes bsIterator(MFn::kBlendShape);
+
+    while (!bsIterator.isDone()) {
+        MFnDependencyNode node(bsIterator.thisNode());
+        // unmap all if empty object name passed
+        if(mayaObjecName == node.name().asChar() || mayaObjecName.isEmpty()) {
+            if (node.hasAttribute(FACE_MAPPING_FILED_NAME.toStdString().c_str())) {
+                MPlug plug = node.findPlug(FACE_MAPPING_FILED_NAME.toStdString().c_str());
+                node.removeAttribute(plug.attribute());
+            }
+        }
+        bsIterator.next();
+    }
+    syncMapping();
+}
+
 void _Mapping::clear()
 {
     objectsMap.clear();
-//    boneMapping.clear();
 }
 
 void _Mapping::resetCallbacks()

@@ -21,6 +21,9 @@
 
 #include <maya/MSceneMessage.h>
 #include <maya/MFnDagNode.h>
+#include <maya/MSelectionList.h>
+#include <maya/MGlobal.h>
+#include <maya/MDagPath.h>
 
 
 enum class RSObjectType : uint8_t {
@@ -220,6 +223,27 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
             menu.addAction("Select mapped skeletons", [=](){
                 Mapping::get()->selectObjects(itemId);
             });
+        }
+
+        if(itemType == RSObjectType::FACE) {
+            menu.addAction("Map to selected objects", [=](){
+                MSelectionList ls;
+                MGlobal::getActiveSelectionList(ls);
+                if(ls.length() > 0)
+                {
+                    MDagPath objPath;
+                    ls.getDagPath(0, objPath);
+
+                    Mapping::get()->mapFaceToMayaObject(objPath.fullPathName().asChar(), itemId);
+                }
+            });
+            menu.addAction("Unmap selected objects", [=](){
+            });
+            menu.addAction("Unmap all", [=](){
+            });
+            menu.addAction("Select objects", [=](){
+            });
+
         }
 
         menu.exec(treeWidget->mapToGlobal(pos));

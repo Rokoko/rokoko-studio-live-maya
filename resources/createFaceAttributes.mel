@@ -7,7 +7,7 @@ proc _createFaceAttrs(string $bsNode) {
         return;
     }
 
-    string $faceMappingName = "RokokoFaceMapping";
+    string $faceMappingName = "FACE_MAPPING_FILED_NAME";
     int $faceAttrExists = `attributeExists $faceMappingName $bsNode`;
 
     if ($faceAttrExists) {

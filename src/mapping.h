@@ -32,6 +32,9 @@ public:
     void createHIKForActor(QString rsObjectID);
     QString getCurrentMayaCharacter();
 
+    void mapFaceToMayaObject(QString mayaObjecName,  QString rsId);
+    void unmapFaceFromMayaObject(QString mayaObjecName="");
+
     void clear();
     void resetCallbacks();
 
