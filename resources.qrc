@@ -23,5 +23,6 @@
         <file>resources/createHIKForActor.mel</file>
         <file>resources/setOrCreateRSIdAttribute.mel</file>
         <file>resources/deleteMappingAttribute.mel</file>
+        <file>resources/createFaceAttributes.mel</file>
     </qresource>
 </RCC>
