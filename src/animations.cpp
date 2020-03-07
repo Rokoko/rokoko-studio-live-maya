@@ -8,10 +8,13 @@
 #include <QJsonValue>
 
 #include <maya/MObject.h>
+#include <maya/MObjectArray.h>
 #include <maya/MFnTransform.h>
 #include <maya/MFnIkJoint.h>
+#include <maya/MFnBlendShapeDeformer.h>
 #include <maya/MDagPath.h>
 #include <maya/MItDag.h>
+#include <maya/MPlug.h>
 #include <maya/MMatrix.h>
 
 #ifdef _WINDOWS
@@ -105,7 +108,8 @@ void _Animations::applyAnimationsToMappedObjects()
     for(QString rsId : allIds) {
         auto it = objectMapping.find(rsId);
         if(it != objectMapping.end()) {
-            while(it != objectMapping.end()) {
+            while(it != objectMapping.end())
+            {
                 QString rsId = it.key();
 
                 if(rsId.isEmpty()) {
@@ -117,19 +121,78 @@ void _Animations::applyAnimationsToMappedObjects()
                 MDagPath dagPath;
                 MDagPath::getAPathTo(object, dagPath);
 
-                // apply props animations
                 if(propsMap.contains(rsId)) {
+                    // apply props animations
+
                     QJsonObject propObject = propsMap[rsId];
                     Local::animatePropOrTracker(propObject, dagPath);
-                // apply trackers animations
+
                 } else if(trackersMap.contains(rsId)) {
+
+                    // apply trackers animations
                     QJsonObject trackerObject = trackersMap[rsId];
                     Local::animatePropOrTracker(trackerObject, dagPath);
-                // apply faces animations
+
                 } else if(facesMap.contains(rsId)) {
-                // apply actor animations
+                    // apply face animations
+
+                    const QStringList faceShapeNames = Mapping::get()->getFaceShapeNames();
+                    // get input data for this face
+                    QJsonObject faceObject = facesMap[rsId];
+
+                    // access mapped blendshape node
+                    MFnBlendShapeDeformer faceFn(object);
+                    unsigned int attrsCount = faceFn.attributeCount();
+                    for(int i=0; i < attrsCount; ++i) {
+                        MObject attr = faceFn.attribute(i);
+                        MPlug plug(object, attr);
+                        std::cout << plug.name() << "\n";
+
+                    }
+
+                    // iterate over all weights and apply values
+//                    unsigned int numWeights = faceFn.numWeights();
+//                    MObjectArray baseObjects;
+//                    faceFn.getBaseObjects(baseObjects);
+
+
+//                    // TODO: run this once when receiver stared
+//                    QHash <QString, MObject> weightsMap;
+//                    for(int i=0; i < baseObjects.length(); ++i) {
+//                        MObject baseObject = baseObjects[i];
+//                        for(unsigned int k=0; k < numWeights; ++k) {
+//                            MObjectArray targets;
+//                            faceFn.getTargets(baseObject, k, targets);
+//                            unsigned int numTargets = targets.length();
+//                            for (int j=0; j < numTargets; ++j) {
+//                                MObject target = targets[j];
+//                                MFnDependencyNode targetFn(target);
+//                                weightsMap[targetFn.name().asChar()] = target;
+//                            }
+//                        }
+//                    }
+
+//                    // for each studio shape name set weight value
+//                    for(QString studioShapeName : faceShapeNames) {
+//                        double weight = faceObject[studioShapeName].toDouble();
+
+//                        MString bsFieldName = BLEND_SHAPE_PREFIX + studioShapeName.toStdString().c_str();
+//                        MStatus fieldPlugStatus;
+//                        MPlug weightAttr = faceFn.findPlug(bsFieldName, true, &fieldPlugStatus);
+//                        if(fieldPlugStatus == MStatus::kSuccess) {
+//                            MString mappedName;
+//                            weightAttr.getValue(mappedName);
+//                            std::cout << mappedName.asChar() << "\n";
+//                            if(weightsMap.contains(mappedName.asChar())) {
+//                                MObject weightObject = weightsMap[mappedName.asChar()];
+//                                bool attrFound = faceFn.hasAttribute(mappedName.asChar());
+//                                std::cout << attrFound << "\n";
+//                            }
+//                        }
+//                    }
 
                 } else if(actorsMap.contains(rsId)) {
+                    // apply actor animations
                     QJsonObject actorObject = actorsMap[rsId];
 
                     // Hips joint mapped implicitly for user

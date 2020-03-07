@@ -17,7 +17,7 @@ public:
     ReceiverContent(QWidget* parent=nullptr);
     ~ReceiverContent();
 private:
-    void onReceiveToggled(bool);
+    void onReceiverToggled(bool);
     QSpinBox* portBox=nullptr;
     DataReceivingWorker* worker=nullptr;
     QLabel* statusLabel=nullptr;
