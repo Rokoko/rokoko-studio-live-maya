@@ -370,8 +370,9 @@ bool _Mapping::mapActorToCurrentMayaCharacter(QString actorID)
     // find hips joint by character name and NAME_Hips pattern
     // TODO: check if namespace break this
     MSelectionList hipsLs;
-    QString hipsBoneName = QString("%1_Hips").arg(activeCharacterName);
-    MStatus hipsFound = MGlobal::getSelectionListByName(MString(hipsBoneName.toStdString().c_str()), hipsLs);
+    QString charHipsCmd = QString("hikGetSkNode(\"%1\", 1);").arg(activeCharacterName);
+    MString hipsBoneName = MGlobal::executeCommandStringResult(charHipsCmd.toStdString().c_str());
+    MStatus hipsFound = MGlobal::getSelectionListByName(hipsBoneName, hipsLs);
     if(hipsFound != MStatus::kSuccess) {
         Utils::spawnMayaError(QString("Unable to map character! %1").arg(activeCharacterName));
         return false;

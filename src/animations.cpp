@@ -142,54 +142,35 @@ void _Animations::applyAnimationsToMappedObjects()
 
                     // access mapped blendshape node
                     MFnBlendShapeDeformer faceFn(object);
-                    unsigned int attrsCount = faceFn.attributeCount();
-                    for(int i=0; i < attrsCount; ++i) {
-                        MObject attr = faceFn.attribute(i);
-                        MPlug plug(object, attr);
-                        std::cout << plug.name() << "\n";
 
+                    // TODO: run this once when receiver stared
+                    // prepare weight weight name to index map
+                    QHash <QString, MPlug> weightsMap;
+
+                    MPlug weightsArray = faceFn.findPlug("weight", false);
+                    unsigned int weightsCount = weightsArray.numElements();
+                    for(unsigned int i=0; i < weightsCount; ++i) {
+                        MPlug shapePlug = weightsArray.elementByPhysicalIndex(i);
+                        MString shapeName = shapePlug.partialName(false, false, false, true, false, false);
+                        weightsMap.insert(shapeName.asChar(), shapePlug);
                     }
 
-                    // iterate over all weights and apply values
-//                    unsigned int numWeights = faceFn.numWeights();
-//                    MObjectArray baseObjects;
-//                    faceFn.getBaseObjects(baseObjects);
+                    // for each studio shape name set weight value
+                    for(QString studioShapeName : faceShapeNames) {
+                        double weight = faceObject[studioShapeName].toDouble() * 0.01;
 
-
-//                    // TODO: run this once when receiver stared
-//                    QHash <QString, MObject> weightsMap;
-//                    for(int i=0; i < baseObjects.length(); ++i) {
-//                        MObject baseObject = baseObjects[i];
-//                        for(unsigned int k=0; k < numWeights; ++k) {
-//                            MObjectArray targets;
-//                            faceFn.getTargets(baseObject, k, targets);
-//                            unsigned int numTargets = targets.length();
-//                            for (int j=0; j < numTargets; ++j) {
-//                                MObject target = targets[j];
-//                                MFnDependencyNode targetFn(target);
-//                                weightsMap[targetFn.name().asChar()] = target;
-//                            }
-//                        }
-//                    }
-
-//                    // for each studio shape name set weight value
-//                    for(QString studioShapeName : faceShapeNames) {
-//                        double weight = faceObject[studioShapeName].toDouble();
-
-//                        MString bsFieldName = BLEND_SHAPE_PREFIX + studioShapeName.toStdString().c_str();
-//                        MStatus fieldPlugStatus;
-//                        MPlug weightAttr = faceFn.findPlug(bsFieldName, true, &fieldPlugStatus);
-//                        if(fieldPlugStatus == MStatus::kSuccess) {
-//                            MString mappedName;
-//                            weightAttr.getValue(mappedName);
-//                            std::cout << mappedName.asChar() << "\n";
-//                            if(weightsMap.contains(mappedName.asChar())) {
-//                                MObject weightObject = weightsMap[mappedName.asChar()];
-//                                bool attrFound = faceFn.hasAttribute(mappedName.asChar());
-//                                std::cout << attrFound << "\n";
-//                            }
-//                        }
-//                    }
+                        MString bsFieldName = BLEND_SHAPE_PREFIX + studioShapeName.toStdString().c_str();
+                        MStatus fieldPlugStatus;
+                        MPlug weightAttr = faceFn.findPlug(bsFieldName, true, &fieldPlugStatus);
+                        if(fieldPlugStatus == MStatus::kSuccess) {
+                            MString mappedName;
+                            weightAttr.getValue(mappedName);
+                            if(weightsMap.contains(mappedName.asChar())) {
+                                MPlug weightPlug = weightsMap[mappedName.asChar()];
+                                weightPlug.setDouble(weight);
+                            }
+                        }
+                    }
 
                 } else if(actorsMap.contains(rsId)) {
                     // apply actor animations
