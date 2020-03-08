@@ -95,6 +95,7 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     startRecordingBtn->setEnabled(false);
     mainLayout->addWidget(startRecordingBtn);
     connect(startReceiverBtn, &QPushButton::toggled, startRecordingBtn, &QPushButton::setEnabled);
+    connect(startRecordingBtn, &QPushButton::toggled, this, &ReceiverContent::recordingToggled);
 
     // error label
     statusLabel = new QLabel("", this);
@@ -265,6 +266,11 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
         menu.exec(treeWidget->mapToGlobal(pos));
     }
 
+}
+
+void ReceiverContent::recordingToggled(bool checked)
+{
+    Animations::get()->recordingToggled(checked);
 }
 
 void ReceiverContent::populateTree()

@@ -2,8 +2,13 @@
 #define ANIMATIONS_H
 
 #include "singleton.h"
+#include "recorder.h"
+
 #include <QHash>
 #include <QJsonObject>
+
+#include <maya/MDagPath.h>
+
 
 class _Animations
 {
@@ -20,6 +25,8 @@ public:
 
     void applyAnimationsToMappedObjects();
 
+    void recordingToggled(bool enabled);
+
     void setSceneScale(float);
     float sceneScale() { return _sceneScale; }
     float timestamp;
@@ -34,6 +41,10 @@ private:
     QHash<QString, QJsonObject> actorsMap;
     // faceId - json
     QHash<QString, QJsonObject> facesMap;
+
+    void animatePropOrTracker(QJsonObject obj, MDagPath dagPath);
+
+    bool recordingEnabled = false;
 };
 
 typedef Singleton<_Animations> Animations;

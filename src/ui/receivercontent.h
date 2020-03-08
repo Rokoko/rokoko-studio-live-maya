@@ -24,6 +24,7 @@ private:
     Button* startReceiverBtn=nullptr;
     QTreeWidget* treeWidget=nullptr;
     void prepareContextMenu(const QPoint &pos);
+    void recordingToggled(bool checked);
     void populateTree();
     void clearTreeWidget();
     void reset();

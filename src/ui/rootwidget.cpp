@@ -49,13 +49,16 @@ RootWidget::RootWidget(QWidget *parent)
     });
 
     // Updater category
-    CategoryHeader* updaterHeader = new CategoryHeader(this, "Updater");
-    mainLayout->addWidget(updaterHeader, 0, Qt::AlignTop);
-    UpdaterContent* updaterContent = new UpdaterContent(this);
-    mainLayout->addWidget(updaterContent, 0, Qt::AlignTop);
-    connect(updaterHeader, &CategoryHeader::collapseStateChanged, [updaterContent](bool bCollapsed) {
-        updaterContent->setVisible(!bCollapsed);
-    });
+    if(false)
+    {
+        CategoryHeader* updaterHeader = new CategoryHeader(this, "Updater");
+        mainLayout->addWidget(updaterHeader, 0, Qt::AlignTop);
+        UpdaterContent* updaterContent = new UpdaterContent(this);
+        mainLayout->addWidget(updaterContent, 0, Qt::AlignTop);
+        connect(updaterHeader, &CategoryHeader::collapseStateChanged, [updaterContent](bool bCollapsed) {
+            updaterContent->setVisible(!bCollapsed);
+        });
+    }
 
     // Info category
     CategoryHeader* infoHeader = new CategoryHeader(this, "Info");

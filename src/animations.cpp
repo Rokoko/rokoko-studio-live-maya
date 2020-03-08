@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "animations.h"
+#include "recorder.h"
 #include "utils.h"
 #include "mapping.h"
 
@@ -73,37 +74,6 @@ void _Animations::applyAnimationsToMappedObjects()
     const QHash<QString, QString> mayaToRsBoneNames = Mapping::get()->getBoneMapping();
     const QHash<QString, MQuaternion> studioTPose = Mapping::get()->getStudioTPose();
 
-    struct Local {
-        static void animatePropOrTracker(QJsonObject obj, MDagPath dagPath) {
-//            bool isLive = obj["isLive"].toBool();
-
-            // do nothing is not live
-//            if(!isLive) return;
-
-            QJsonObject postitionObject = obj["position"].toObject();
-            QJsonObject rotationObject = obj["rotation"].toObject();
-            MVector rsPosition(postitionObject["x"].toDouble(),
-                               postitionObject["y"].toDouble(),
-                               postitionObject["z"].toDouble());
-
-            MQuaternion rsRotation(rotationObject["x"].toDouble(),
-                                   rotationObject["y"].toDouble(),
-                                   rotationObject["z"].toDouble(),
-                                   rotationObject["w"].toDouble());
-
-            // convert RS transform to Maya transform
-            MVector mayaPosition = Utils::rsToMaya(rsPosition) * Animations::get()->sceneScale();
-            MQuaternion mayaRotation = Utils::rsToMaya(rsRotation);
-            MTransformationMatrix finalTransform(MTransformationMatrix::identity);
-            finalTransform.setTranslation(mayaPosition, MSpace::kWorld);
-            finalTransform.setRotationQuaternion(mayaRotation.x, mayaRotation.y, mayaRotation.z, mayaRotation.w);
-
-            // apply converted transform onto mapped object
-            MFnTransform fn(dagPath);
-            fn.set(finalTransform);
-        }
-    };
-
     QList<QString> allIds = objectMapping.keys();
     for(QString rsId : allIds) {
         auto it = objectMapping.find(rsId);
@@ -125,13 +95,13 @@ void _Animations::applyAnimationsToMappedObjects()
                     // apply props animations
 
                     QJsonObject propObject = propsMap[rsId];
-                    Local::animatePropOrTracker(propObject, dagPath);
+                    animatePropOrTracker(propObject, dagPath);
 
                 } else if(trackersMap.contains(rsId)) {
 
                     // apply trackers animations
                     QJsonObject trackerObject = trackersMap[rsId];
-                    Local::animatePropOrTracker(trackerObject, dagPath);
+                    animatePropOrTracker(trackerObject, dagPath);
 
                 } else if(facesMap.contains(rsId)) {
                     // apply face animations
@@ -144,7 +114,7 @@ void _Animations::applyAnimationsToMappedObjects()
                     MFnBlendShapeDeformer faceFn(object);
 
                     // TODO: run this once when receiver stared
-                    // prepare weight weight name to index map
+                    // prepare weight weight name to attribute plug map
                     QHash <QString, MPlug> weightsMap;
 
                     MPlug weightsArray = faceFn.findPlug("weight", false);
@@ -258,7 +228,57 @@ void _Animations::applyAnimationsToMappedObjects()
     }
 }
 
+void _Animations::recordingToggled(bool enabled)
+{
+    recordingEnabled = enabled;
+    if(!recordingEnabled) {
+        // put cached data into timeline
+        Recorder::get()->finalizeRecording();
+    }
+
+}
+
 void _Animations::setSceneScale(float scale)
 {
     _sceneScale = scale;
 }
+
+void _Animations::animatePropOrTracker(QJsonObject obj, MDagPath dagPath)
+{
+//    bool isLive = obj["isLive"].toBool();
+
+     // do nothing is not live
+//    if(!isLive) return;
+
+    QJsonObject postitionObject = obj["position"].toObject();
+    QJsonObject rotationObject = obj["rotation"].toObject();
+    MVector rsPosition(postitionObject["x"].toDouble(),
+                       postitionObject["y"].toDouble(),
+                       postitionObject["z"].toDouble());
+
+    MQuaternion rsRotation(rotationObject["x"].toDouble(),
+                           rotationObject["y"].toDouble(),
+                           rotationObject["z"].toDouble(),
+                           rotationObject["w"].toDouble());
+
+    // convert RS transform to Maya transform
+    MVector mayaPosition = Utils::rsToMaya(rsPosition) * Animations::get()->sceneScale();
+    MQuaternion mayaRotation = Utils::rsToMaya(rsRotation);
+    MTransformationMatrix finalTransform(MTransformationMatrix::identity);
+    finalTransform.setTranslation(mayaPosition, MSpace::kWorld);
+    finalTransform.setRotationQuaternion(mayaRotation.x, mayaRotation.y, mayaRotation.z, mayaRotation.w);
+
+    // apply converted transform onto mapped object
+    MFnTransform fn(dagPath);
+    fn.set(finalTransform);
+
+    if(recordingEnabled) {
+        // if timestamp value not in storage - record
+        Recorder::get()->recordPropOrTracker(timestamp, dagPath, mayaPosition, mayaRotation);
+    }
+}
+
+
+
+
+

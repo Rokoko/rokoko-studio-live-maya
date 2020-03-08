@@ -32,6 +32,7 @@ SOURCES += \
     src/main.cpp \
     src/mapping.cpp \
     src/receiverworker.cpp \
+    src/recorder.cpp \
     src/ui/button.cpp \
     src/ui/categoryheader.cpp \
     src/ui/commandapicontent.cpp \
@@ -47,6 +48,7 @@ HEADERS += \
     src/constants.h \
     src/mapping.h \
     src/receiverworker.h \
+    src/recorder.h \
     src/singleton.h \
     src/ui/button.h \
     src/ui/categoryheader.h \
