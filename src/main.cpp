@@ -11,6 +11,10 @@
 #include <maya/MQtUtil.h>
 #include <maya/MTimerMessage.h>
 
+#ifdef _WINDOWS
+    #pragma comment(lib,"OpenMayaAnim.lib")
+#endif
+
 QPointer<QScrollArea> rsmlScrollArea;
 QPointer<RootWidget> rsmlWidget;
 QPointer<QWidget> workspaceControl;

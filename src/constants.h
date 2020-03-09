@@ -13,4 +13,6 @@ static const int VERSION_MAJOR = 0;
 static const int VERSION_MINOR = 1;
 static const int VERSION_PATCH = 0;
 
+static const int RECEIVER_FPS = 30;
+
 #endif // CONSTANTS_H

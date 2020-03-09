@@ -214,29 +214,7 @@ void _Mapping::mapRSObjectToSelection(QString rsObjectID)
     cmdString.replace("RS_ID_TAG", rsObjectID);
     MGlobal::executeCommand(cmdString.toStdString().c_str());
 
-    // put ids into objectsMap
-    MSelectionList ls;
-    MGlobal::getActiveSelectionList(ls);
-    MItSelectionList iter(ls);
-    while(!iter.isDone()) {
-        MObject object;
-        MFnDependencyNode node(object);
-        if(!objectsMap.contains(rsObjectID, object))
-        {
-            objectsMap.insert(rsObjectID, object);
-            std::cout << "Store: " << node.name().asChar() << "\n";
-        } else {
-            std::cout << "Already mapped: " << node.name().asChar() << "\n";
-        }
-        iter.next();
-    }
-
-    auto objects = objectsMap.values(rsObjectID);
-    for(auto obj : objects) {
-        MFnDependencyNode node(obj);
-        std::cout << node.name() << " < ";
-    }
-    std::cout << "\n";
+    syncMapping();
 }
 
 void _Mapping::unmapRSObject(QString rsObjectID, bool selected=false)

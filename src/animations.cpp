@@ -18,10 +18,6 @@
 #include <maya/MPlug.h>
 #include <maya/MMatrix.h>
 
-#ifdef _WINDOWS
-    #pragma comment(lib,"OpenMayaAnim.lib")
-#endif
-
 
 _Animations::_Animations()
 {
@@ -77,6 +73,7 @@ void _Animations::applyAnimationsToMappedObjects()
     QList<QString> allIds = objectMapping.keys();
     for(QString rsId : allIds) {
         auto it = objectMapping.find(rsId);
+//        std::cout << "cnt: " << objectMapping.count(rsId) << std::endl;
         if(it != objectMapping.end()) {
             while(it != objectMapping.end())
             {
@@ -96,6 +93,7 @@ void _Animations::applyAnimationsToMappedObjects()
 
                     QJsonObject propObject = propsMap[rsId];
                     animatePropOrTracker(propObject, dagPath);
+//                    printf("prop animated %s - %s\n", dagPath.partialPathName().asChar(), rsId.toStdString().c_str());
 
                 } else if(trackersMap.contains(rsId)) {
 
@@ -152,7 +150,7 @@ void _Animations::applyAnimationsToMappedObjects()
                     // We transform HIK source skeleton. To see results on custom character user should create
                     // Another character and define it, than set it as target for our generated character.
 
-                    MItDag it;
+                    MItDag jIt;
                     MFnDagNode hipDagNode(dagPath);
                     MVector referenceOffset;
                     MQuaternion referenceQuat;
@@ -166,10 +164,10 @@ void _Animations::applyAnimationsToMappedObjects()
                         referenceQuat.normalizeIt();
                     }
 
-                    it.reset(dagPath, MItDag::kBreadthFirst, MFn::kJoint);
-                    while(!it.isDone()) {
+                    jIt.reset(dagPath, MItDag::kBreadthFirst, MFn::kJoint);
+                    while(!jIt.isDone()) {
                         MDagPath jointPath;
-                        it.getPath(jointPath);
+                        jIt.getPath(jointPath);
 
                         QString jointPathString(jointPath.fullPathName().asChar());
                         // this name contains character name CHARNAME_BONENAME
@@ -211,7 +209,7 @@ void _Animations::applyAnimationsToMappedObjects()
                             fnTr.setRotation(boneQuat, MSpace::kWorld);
                         }
 
-                        it.next();
+                        jIt.next();
                     }
 
                 } else {
@@ -243,7 +241,7 @@ void _Animations::setSceneScale(float scale)
     _sceneScale = scale;
 }
 
-void _Animations::animatePropOrTracker(QJsonObject obj, MDagPath dagPath)
+void _Animations::animatePropOrTracker(QJsonObject obj, const MDagPath &dagPath)
 {
 //    bool isLive = obj["isLive"].toBool();
 

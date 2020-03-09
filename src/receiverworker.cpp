@@ -13,7 +13,7 @@ DataReceivingWorker::DataReceivingWorker(QObject* parent)
     connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &DataReceivingWorker::onSocketError);
 
     connect(&hearbeat, &QTimer::timeout, this, &DataReceivingWorker::onHearBeat);
-    hearbeat.setInterval(33);
+    hearbeat.setInterval(1000 / RECEIVER_FPS);
     hearbeat.start();
 }
 

@@ -42,7 +42,7 @@ private:
     // faceId - json
     QHash<QString, QJsonObject> facesMap;
 
-    void animatePropOrTracker(QJsonObject obj, MDagPath dagPath);
+    void animatePropOrTracker(QJsonObject obj, const MDagPath &dagPath);
 
     bool recordingEnabled = false;
 };
