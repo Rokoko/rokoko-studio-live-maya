@@ -2,6 +2,8 @@
 #include "constants.h"
 #include "recorder.h"
 
+#include <maya/MFnBlendShapeDeformer.h>
+#include <maya/MAnimControl.h>
 #include <maya/MObjectArray.h>
 #include <maya/MQuaternion.h>
 #include <maya/MEulerRotation.h>
@@ -31,9 +33,19 @@ void _Recorder::recordPropOrTracker(float timestamp, MDagPath path, MVector loca
     }
 
     // put transform for objects
-    if(!recordedData[timestamp].objects.contains(path.fullPathName().asChar()))
-        recordedData[timestamp].objects.insert(path.fullPathName().asChar(), { location, rotation });
+    recordedData[timestamp].objects.insert(path.fullPathName().asChar(), { location, rotation });
 
+}
+
+void _Recorder::recordFace(float timestamp, std::function<void(int)> foo)
+{
+    // create frame object if not exists
+    if(!recordedData.contains(timestamp)) {
+        recordedData[timestamp] = FrameData();
+    }
+
+    // put weight data for each blend shape node
+    recordedData[timestamp].setFaceKeyframDelegates.append(foo);
 }
 
 void _Recorder::finalizeRecording()
@@ -61,15 +73,20 @@ void _Recorder::finalizeRecording()
                 ls.getDagPath(0, dagPath);
 
                 auto kfData = fData.objects[path];
-                keyframeDoubleAttribute("tx", frame, dagPath, kfData.first.x);
-                keyframeDoubleAttribute("ty", frame, dagPath, kfData.first.y);
-                keyframeDoubleAttribute("tz", frame, dagPath, kfData.first.z);
+                keyframeNumericAttribute("tx", frame, dagPath, kfData.first.x);
+                keyframeNumericAttribute("ty", frame, dagPath, kfData.first.y);
+                keyframeNumericAttribute("tz", frame, dagPath, kfData.first.z);
 
                 MEulerRotation euRot = kfData.second.asEulerRotation();
-                keyframeDoubleAttribute("rx", frame, dagPath, euRot.x);
-                keyframeDoubleAttribute("ry", frame, dagPath, euRot.y);
-                keyframeDoubleAttribute("rz", frame, dagPath, euRot.z);
+                keyframeNumericAttribute("rx", frame, dagPath, euRot.x);
+                keyframeNumericAttribute("ry", frame, dagPath, euRot.y);
+                keyframeNumericAttribute("rz", frame, dagPath, euRot.z);
             }
+        }
+
+        // bake faces
+        for(auto foo : fData.setFaceKeyframDelegates) {
+            foo(frame);
         }
     }
 
@@ -103,20 +120,32 @@ int _Recorder::getCorrectedFrameNumber(const QList<float> &timestamps, int frame
     return currFrame;
 }
 
-void _Recorder::keyframeDoubleAttribute(MString attrName, int frame, MDagPath dagPath, double value)
+void _Recorder::recordingToggled(bool enabled)
+{
+    mRecordingStartTime = MAnimControl::currentTime().value();
+    isRecording = enabled;
+}
+
+void _Recorder::keyframeNumericAttribute(MString attrName, int frame, MDagPath dagPath, double value)
 {
     MFnAnimCurve curveFn;
     MFnDagNode fn(dagPath);
-    MPlug txPlug = fn.findPlug(attrName, false, nullptr);
-    MFnAnimCurve::AnimCurveType curveType = curveFn.timedAnimCurveTypeForPlug(txPlug);
+    MPlug plug = fn.findPlug(attrName, false, nullptr);
+    keyframeNumericAttribute(frame, plug, value);
+}
+
+void _Recorder::keyframeNumericAttribute(int frame, MPlug plug, double value)
+{
+    MFnAnimCurve curveFn;
+    MFnAnimCurve::AnimCurveType curveType = curveFn.timedAnimCurveTypeForPlug(plug);
 
     // get or create curve function set
-    MObject txCurve;
+    MObject curve;
     MPlugArray srcPlugs;
-    if (txPlug.connectedTo(srcPlugs, true, false))
+    if (plug.connectedTo(srcPlugs, true, false))
         curveFn.setObject(srcPlugs[0].node());
     else
-        txCurve = curveFn.create(txPlug, curveType);
+        curve = curveFn.create(plug, curveType);
 
     curveFn.addKey(MTime(frame, MTime::uiUnit()), value);
 }

@@ -9,6 +9,7 @@
 #include <QJsonValue>
 
 #include <maya/MObject.h>
+#include <maya/MSelectionList.h>
 #include <maya/MObjectArray.h>
 #include <maya/MFnTransform.h>
 #include <maya/MFnIkJoint.h>
@@ -114,14 +115,7 @@ void _Animations::applyAnimationsToMappedObjects()
                     // TODO: run this once when receiver stared
                     // prepare weight weight name to attribute plug map
                     QHash <QString, MPlug> weightsMap;
-
-                    MPlug weightsArray = faceFn.findPlug("weight", false);
-                    unsigned int weightsCount = weightsArray.numElements();
-                    for(unsigned int i=0; i < weightsCount; ++i) {
-                        MPlug shapePlug = weightsArray.elementByPhysicalIndex(i);
-                        MString shapeName = shapePlug.partialName(false, false, false, true, false, false);
-                        weightsMap.insert(shapeName.asChar(), shapePlug);
-                    }
+                    Utils::fillFaceWeightsMap(faceFn, weightsMap);
 
                     // for each studio shape name set weight value
                     for(QString studioShapeName : faceShapeNames) {
@@ -136,6 +130,14 @@ void _Animations::applyAnimationsToMappedObjects()
                             if(weightsMap.contains(mappedName.asChar())) {
                                 MPlug weightPlug = weightsMap[mappedName.asChar()];
                                 weightPlug.setDouble(weight);
+                                if(recordingEnabled) {
+
+                                    // this functions will be called later
+                                    Recorder::get()->recordFace(timestamp, [object, weight, weightPlug](int frame) {
+                                        MFnBlendShapeDeformer faceFn(object);
+                                        Recorder::get()->keyframeNumericAttribute(frame, weightPlug, weight);
+                                    });
+                                }
                             }
                         }
                     }
@@ -229,6 +231,7 @@ void _Animations::applyAnimationsToMappedObjects()
 void _Animations::recordingToggled(bool enabled)
 {
     recordingEnabled = enabled;
+    Recorder::get()->recordingToggled(enabled);
     if(!recordingEnabled) {
         // put cached data into timeline
         Recorder::get()->finalizeRecording();
@@ -245,7 +248,7 @@ void _Animations::animatePropOrTracker(QJsonObject obj, const MDagPath &dagPath)
 {
 //    bool isLive = obj["isLive"].toBool();
 
-     // do nothing is not live
+     // do nothing if not live
 //    if(!isLive) return;
 
     QJsonObject postitionObject = obj["position"].toObject();

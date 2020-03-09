@@ -12,6 +12,7 @@ public:
     static void mayaPrintMessage(QString message);
     static MVector rsToMaya(MVector);
     static MQuaternion rsToMaya(MQuaternion);
+    static void fillFaceWeightsMap(const MFnBlendShapeDeformer &bsFn, QHash<QString, MPlug> &map);
 };
 
 

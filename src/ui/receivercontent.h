@@ -3,6 +3,7 @@
 
 #include "receiverworker.h"
 #include "ui/button.h"
+#include "ui/recordbutton.h"
 #include <QWidget>
 #include <QSpinBox>
 #include <QLabel>
@@ -23,6 +24,7 @@ private:
     QLabel* statusLabel=nullptr;
     Button* startReceiverBtn=nullptr;
     QTreeWidget* treeWidget=nullptr;
+    RecordButton* startRecordingBtn=nullptr;
     void prepareContextMenu(const QPoint &pos);
     void recordingToggled(bool checked);
     void populateTree();

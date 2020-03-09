@@ -3,7 +3,6 @@
 #include "animations.h"
 #include "mapping.h"
 #include "utils.h"
-#include "ui/recordbutton.h"
 
 #include <QThread>
 #include <QVBoxLayout>
@@ -91,7 +90,7 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     connect(startReceiverBtn, &Button::toggled, this, &ReceiverContent::onReceiverToggled);
 
     // record button
-    RecordButton* startRecordingBtn = new RecordButton(this);
+    startRecordingBtn = new RecordButton(this);
     startRecordingBtn->setEnabled(false);
     mainLayout->addWidget(startRecordingBtn);
     connect(startReceiverBtn, &QPushButton::toggled, startRecordingBtn, &QPushButton::setEnabled);
