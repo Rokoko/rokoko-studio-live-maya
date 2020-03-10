@@ -16,35 +16,16 @@
 #include <maya/MFnBlendShapeDeformer.h>
 
 
-
-class FrameData {
-
-public:
-    // objects
-    // object name - TR
-    QHash<QString, QPair<MVector, MQuaternion>> objects;
-
-    //faces
-    QList<std::function<void(int)>> setFaceKeyframDelegates;
-
-    // characters
-    //...
-};
-
-
 class _Recorder
 {
 public:
     _Recorder();
 
-    void recordPropOrTracker(float timestamp, MDagPath path, MVector location, MQuaternion rotation);
+    void recordPropOrTracker(float timestamp, std::function<void(int)> foo);
     void recordFace(float timestamp, std::function<void(int)> foo);
+    void recordBone(float timestamp, std::function<void(int)> foo);
 
     void finalizeRecording();
-
-    static int getFrame(const QList<float> &timestamps, int frameNumber);
-
-    static int getCorrectedFrameNumber(const QList<float> &timestamps, int frameIndex);
 
     void recordingToggled(bool enabled);
 
@@ -57,7 +38,8 @@ public:
 
     QList<float> sortedTimeStamps();
 private:
-    QHash<float, FrameData> recordedData;
+    // timestamp - set keyframe function
+    QHash<float, QList<std::function<void(int)>>> recordedData;
     float mRecordingStartTime;
     bool isRecording = false;
 };

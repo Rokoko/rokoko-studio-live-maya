@@ -25,27 +25,19 @@ _Recorder::_Recorder()
 
 }
 
-void _Recorder::recordPropOrTracker(float timestamp, MDagPath path, MVector location, MQuaternion rotation)
+void _Recorder::recordPropOrTracker(float timestamp, std::function<void(int)> foo)
 {
-    // create frame object if not exists
-    if(!recordedData.contains(timestamp)) {
-        recordedData[timestamp] = FrameData();
-    }
-
-    // put transform for objects
-    recordedData[timestamp].objects.insert(path.fullPathName().asChar(), { location, rotation });
-
+    recordedData[timestamp].append(foo);
 }
 
 void _Recorder::recordFace(float timestamp, std::function<void(int)> foo)
 {
-    // create frame object if not exists
-    if(!recordedData.contains(timestamp)) {
-        recordedData[timestamp] = FrameData();
-    }
+    recordedData[timestamp].append(foo);
+}
 
-    // put weight data for each blend shape node
-    recordedData[timestamp].setFaceKeyframDelegates.append(foo);
+void _Recorder::recordBone(float timestamp, std::function<void (int)> foo)
+{
+    recordedData[timestamp].append(foo);
 }
 
 void _Recorder::finalizeRecording()
@@ -60,64 +52,14 @@ void _Recorder::finalizeRecording()
         index++;
         int frame = index;
 
-        FrameData fData = recordedData[ts];
+        auto delegates = recordedData[ts];
 
-        // bake props or trackers
-        if(fData.objects.count() > 0)
-        {
-            for(QString path : fData.objects.keys())
-            {
-                MSelectionList ls;
-                ls.add(path.toStdString().c_str(), false);
-                MDagPath dagPath;
-                ls.getDagPath(0, dagPath);
+        // bake
+        for (auto foo : delegates) foo(frame);
 
-                auto kfData = fData.objects[path];
-                keyframeNumericAttribute("tx", frame, dagPath, kfData.first.x);
-                keyframeNumericAttribute("ty", frame, dagPath, kfData.first.y);
-                keyframeNumericAttribute("tz", frame, dagPath, kfData.first.z);
-
-                MEulerRotation euRot = kfData.second.asEulerRotation();
-                keyframeNumericAttribute("rx", frame, dagPath, euRot.x);
-                keyframeNumericAttribute("ry", frame, dagPath, euRot.y);
-                keyframeNumericAttribute("rz", frame, dagPath, euRot.z);
-            }
-        }
-
-        // bake faces
-        for(auto foo : fData.setFaceKeyframDelegates) {
-            foo(frame);
-        }
     }
 
     recordedData.clear();
-}
-
-int _Recorder::getFrame(const QList<float> &timestamps, int frameNumber)
-{
-    return int(round((timestamps[frameNumber] - timestamps[0]) * RECEIVER_FPS));
-}
-
-int _Recorder::getCorrectedFrameNumber(const QList<float> &timestamps, int frameIndex)
-{
-    int currFrame = getFrame(timestamps, frameIndex);
-    if (0 < frameIndex < timestamps.count() - 1)
-    {
-        int prev_frame = getFrame(timestamps, frameIndex - 1);
-        int next_frame = getFrame(timestamps, frameIndex + 1);
-        if (prev_frame == currFrame && next_frame == currFrame + 2)
-            currFrame += 1;
-        if (next_frame == currFrame && prev_frame == currFrame - 2)
-            currFrame -= 1;
-    }
-
-    if (frameIndex == timestamps.count() - 1)
-    {
-        int prev_frame = getFrame(timestamps, frameIndex - 1);
-        if (prev_frame == currFrame)
-            currFrame += 1;
-    }
-    return currFrame;
 }
 
 void _Recorder::recordingToggled(bool enabled)

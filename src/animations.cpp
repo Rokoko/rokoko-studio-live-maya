@@ -10,6 +10,7 @@
 
 #include <maya/MObject.h>
 #include <maya/MSelectionList.h>
+#include <maya/MEulerRotation.h>
 #include <maya/MObjectArray.h>
 #include <maya/MFnTransform.h>
 #include <maya/MFnIkJoint.h>
@@ -134,7 +135,6 @@ void _Animations::applyAnimationsToMappedObjects()
 
                                     // this functions will be called later
                                     Recorder::get()->recordFace(timestamp, [object, weight, weightPlug](int frame) {
-                                        MFnBlendShapeDeformer faceFn(object);
                                         Recorder::get()->keyframeNumericAttribute(frame, weightPlug, weight);
                                     });
                                 }
@@ -209,6 +209,22 @@ void _Animations::applyAnimationsToMappedObjects()
                             boneQuat *= referenceQuat;
                             boneQuat.normalizeIt();
                             fnTr.setRotation(boneQuat, MSpace::kWorld);
+
+                            if(recordingEnabled) {
+                                MVector recordLocation = fnTr.getTranslation(MSpace::kTransform);
+                                MQuaternion recordRotation;
+                                fnTr.getRotation(recordRotation);
+                                Recorder::get()->recordBone(timestamp, [recordLocation, jointPath, recordRotation](int frame) {
+                                    Recorder::get()->keyframeNumericAttribute("tx", frame, jointPath, recordLocation.x);
+                                    Recorder::get()->keyframeNumericAttribute("ty", frame, jointPath, recordLocation.y);
+                                    Recorder::get()->keyframeNumericAttribute("tz", frame, jointPath, recordLocation.z);
+
+                                    MEulerRotation euAngle = recordRotation.asEulerRotation();
+                                    Recorder::get()->keyframeNumericAttribute("rx", frame, jointPath, euAngle.x);
+                                    Recorder::get()->keyframeNumericAttribute("ry", frame, jointPath, euAngle.y);
+                                    Recorder::get()->keyframeNumericAttribute("rz", frame, jointPath, euAngle.z);
+                                });
+                            }
                         }
 
                         jIt.next();
@@ -274,8 +290,16 @@ void _Animations::animatePropOrTracker(QJsonObject obj, const MDagPath &dagPath)
     fn.set(finalTransform);
 
     if(recordingEnabled) {
-        // if timestamp value not in storage - record
-        Recorder::get()->recordPropOrTracker(timestamp, dagPath, mayaPosition, mayaRotation);
+        Recorder::get()->recordPropOrTracker(timestamp, [mayaPosition, mayaRotation, dagPath](int frame){
+            Recorder::get()->keyframeNumericAttribute("tx", frame, dagPath, mayaPosition.x);
+            Recorder::get()->keyframeNumericAttribute("ty", frame, dagPath, mayaPosition.y);
+            Recorder::get()->keyframeNumericAttribute("tz", frame, dagPath, mayaPosition.z);
+
+            MEulerRotation euAngle = mayaRotation.asEulerRotation();
+            Recorder::get()->keyframeNumericAttribute("rx", frame, dagPath, euAngle.x);
+            Recorder::get()->keyframeNumericAttribute("ry", frame, dagPath, euAngle.y);
+            Recorder::get()->keyframeNumericAttribute("rz", frame, dagPath, euAngle.z);
+        });
     }
 }
 
