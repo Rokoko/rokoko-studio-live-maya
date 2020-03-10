@@ -55,6 +55,13 @@ void Utils::fillFaceWeightsMap(const MFnBlendShapeDeformer &bsFn, QHash<QString,
     }
 }
 
+void Utils::showWSControl()
+{
+    // workspaceControl -e -vis true "RSLMControl";
+    QString cmd = QString("workspaceControl -e -vis true \"RSLMControl\"");
+    MGlobal::executeCommand(cmd.toStdString().c_str());
+}
+
 void Utils::removeMayaWSControl()
 {
     QString closeCmd = QString("if (`window -ex \"%1\"`); workspaceControl -e -close \"%1\";").arg(WORKSPACE_CONTROL_NAME);

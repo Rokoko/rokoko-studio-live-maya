@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-static const char* WORKSPACE_CONTROL_NAME = "RSMLControl";
+static const char* WORKSPACE_CONTROL_NAME = "RSLMControl";
 static const char* WIDGET_TITLE = "Rokoko Studio Live";
 static const int INITIAL_WINDOW_WIDTH = 400;
 static const int MINIMUM_WINDOW_WIDTH = 100;

@@ -17,8 +17,8 @@
     #pragma comment(lib,"OpenMayaAnim.lib")
 #endif
 
-QPointer<QScrollArea> rsmlScrollArea;
-QPointer<RootWidget> rsmlWidget;
+QPointer<QScrollArea> rslmScrollArea;
+QPointer<RootWidget> rslmWidget;
 QPointer<QWidget> workspaceControl;
 
 
@@ -36,27 +36,33 @@ public:
 
         MStatus result = MStatus::kSuccess;
 
-        if(!rsmlWidget.isNull()) {
+        if(!rslmWidget.isNull()) {
             // do nothing if already visible
-            if(rsmlWidget->isVisible()) return MStatus::kFailure;
+            if(rslmWidget->isVisible())
+            {
+                std::cout << "Failed to open\n";
+                return MStatus::kFailure;
+            }
         }
-
 
         if(workspaceControl.isNull())
         {
             MString cmd;
             char sizeArgs[128];
             sprintf(sizeArgs, "-iw %d -mw %d -ih %d -mh %d", INITIAL_WINDOW_WIDTH, MINIMUM_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT, MINIMUM_WINDOW_HEIGHT);
-            cmd.format("workspaceControl -l \"^1s\" -fl true ^2s \"RSMLControl\";", WIDGET_TITLE, sizeArgs);
+            cmd.format("workspaceControl -l \"^1s\" -fl true ^2s \"RSLMControl\";", WIDGET_TITLE, sizeArgs);
             MGlobal::executeCommand(cmd);
+
+            workspaceControl = MQtUtil::findControl(WORKSPACE_CONTROL_NAME);
+            rslmScrollArea = new QScrollArea(workspaceControl);
+            rslmWidget = new RootWidget(workspaceControl);
+            rslmScrollArea->setWidget(rslmWidget);
+            rslmScrollArea->setWidgetResizable(true);
+            MQtUtil::addWidgetToMayaLayout(rslmScrollArea, workspaceControl);
+        } else {
+            Utils::showWSControl();
         }
 
-        workspaceControl = MQtUtil::findControl(WORKSPACE_CONTROL_NAME);
-        rsmlScrollArea = new QScrollArea(workspaceControl);
-        rsmlWidget = new RootWidget(workspaceControl);
-        rsmlScrollArea->setWidget(rsmlWidget);
-        rsmlScrollArea->setWidgetResizable(true);
-        MQtUtil::addWidgetToMayaLayout(rsmlScrollArea, workspaceControl);
 
         return result;
     }
@@ -92,12 +98,12 @@ MStatus uninitializePlugin(MObject obj)
         Utils::removeMayaWSControl();
     }
 
-    if(!rsmlWidget.isNull()) {
-        rsmlWidget.clear();
+    if(!rslmWidget.isNull()) {
+        rslmWidget.clear();
     }
 
-    if(!rsmlScrollArea.isNull()) {
-        rsmlScrollArea.clear();
+    if(!rslmScrollArea.isNull()) {
+        rslmScrollArea.clear();
     }
 
     Utils::RSLMShutdown();
