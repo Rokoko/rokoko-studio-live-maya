@@ -7,7 +7,14 @@
 #include <maya/MCallbackIdArray.h>
 #include <QMultiMap>
 #include <QHash>
+#include <maya/MString.h>
 
+
+const MString MAPPING_FILED_NAME = "RokokoMapping";
+const MString FACE_MAPPING_FILED_NAME = "RokokoFaceMapping";
+const MString BLEND_SHAPE_PREFIX = "RKK_";
+const MString PREFIXED_FACE_ID = BLEND_SHAPE_PREFIX + "FaceId";
+const QString BS_SEPARATOR("3996e3a0");
 
 
 class _Mapping
@@ -27,10 +34,14 @@ public:
     bool mapActorToCurrentMayaCharacter(QString actorID);
     void unmapMayaObjectByName(QString mayaObjecName);
 
-    void setOrCreateRSIdAttribute(QString mayaObjecName, QString rsObjectID);
+    void setOrCreateRSIdAttribute(QString mayaObjecName, QString rsId);
 
     void createHIKForActor(QString rsObjectID);
     QString getCurrentMayaCharacter();
+
+    void mapFaceToMayaObject(QString mayaObjecName,  QString rsId);
+    void unmapFaceFromMayaObject(QString mayaObjecName="");
+    void unmapAllFaces(QString rsId);
 
     void clear();
     void resetCallbacks();
@@ -38,6 +49,7 @@ public:
     const QMultiMap<QString, MObject> &getObjectMapping();
     const QHash<QString, QString> &getBoneMapping();
     const QHash<QString, MQuaternion> &getStudioTPose();
+    const QStringList &getFaceShapeNames() { return faceShapeNames; };
 private:
     // prop id - maya object
     QMultiMap<QString, MObject> objectsMap;
@@ -45,6 +57,9 @@ private:
     QHash<QString, QString> boneMapping;
     // studio t-pose
     QHash<QString, MQuaternion> studioTPose;
+
+    // studio face shape names
+    QStringList faceShapeNames;
 
     MCallbackIdArray callbacks;
 };

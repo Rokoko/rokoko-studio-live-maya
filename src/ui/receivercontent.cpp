@@ -3,7 +3,6 @@
 #include "animations.h"
 #include "mapping.h"
 #include "utils.h"
-#include "ui/recordbutton.h"
 
 #include <QThread>
 #include <QVBoxLayout>
@@ -21,6 +20,10 @@
 
 #include <maya/MSceneMessage.h>
 #include <maya/MFnDagNode.h>
+#include <maya/MSelectionList.h>
+#include <maya/MItSelectionList.h>
+#include <maya/MGlobal.h>
+#include <maya/MDagPath.h>
 
 
 enum class RSObjectType : uint8_t {
@@ -84,13 +87,14 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     startReceiverBtn = new Button(this, receiverBtnParams);
     startReceiverBtn->setCheckable(true);
     mainLayout->addWidget(startReceiverBtn);
-    connect(startReceiverBtn, &Button::toggled, this, &ReceiverContent::onReceiveToggled);
+    connect(startReceiverBtn, &Button::toggled, this, &ReceiverContent::onReceiverToggled);
 
     // record button
-    RecordButton* startRecordingBtn = new RecordButton(this);
+    startRecordingBtn = new RecordButton(this);
     startRecordingBtn->setEnabled(false);
     mainLayout->addWidget(startRecordingBtn);
     connect(startReceiverBtn, &QPushButton::toggled, startRecordingBtn, &QPushButton::setEnabled);
+    connect(startRecordingBtn, &QPushButton::toggled, this, &ReceiverContent::recordingToggled);
 
     // error label
     statusLabel = new QLabel("", this);
@@ -140,7 +144,7 @@ ReceiverContent::~ReceiverContent()
 }
 
 
-void ReceiverContent::onReceiveToggled(bool checked)
+void ReceiverContent::onReceiverToggled(bool checked)
 {
     if(checked)
     {
@@ -161,9 +165,7 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
         // this item can't be mapped
         if(itemId.isEmpty()) return;
 
-        // check item type and create special menus for actors
-        // ...
-
+        // check item type and create special menus for each type
 
         QMenu menu(this);
         if(itemType == RSObjectType::PROP || itemType == RSObjectType::TRACKER) {
@@ -222,9 +224,52 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
             });
         }
 
+        if(itemType == RSObjectType::FACE) {
+            menu.addAction("Map to selected objects", [=](){
+                MSelectionList ls;
+                MGlobal::getActiveSelectionList(ls);
+                if(ls.length() > 0)
+                {
+                    MItSelectionList it(ls);
+                    while(!it.isDone()) {
+                        MDagPath objPath;
+                        it.getDagPath(objPath);
+                        Mapping::get()->mapFaceToMayaObject(objPath.fullPathName().asChar(), itemId);
+
+                        it.next();
+                    }
+
+                }
+            });
+            menu.addAction("Unmap selected objects", [=](){
+                MSelectionList ls;
+                MGlobal::getActiveSelectionList(ls);
+                if(ls.length() > 0)
+                {
+                    MItSelectionList it(ls);
+                    while(!it.isDone()) {
+                        MDagPath objPath;
+                        it.getDagPath(objPath);
+                        Mapping::get()->unmapFaceFromMayaObject(objPath.fullPathName().asChar());
+                        it.next();
+                    }
+                }
+            });
+
+            menu.addAction("Unmap all", [=](){
+                Mapping::get()->unmapAllFaces(itemId);
+            });
+
+        }
+
         menu.exec(treeWidget->mapToGlobal(pos));
     }
 
+}
+
+void ReceiverContent::recordingToggled(bool checked)
+{
+    Animations::get()->recordingToggled(checked);
 }
 
 void ReceiverContent::populateTree()
