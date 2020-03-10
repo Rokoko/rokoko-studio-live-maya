@@ -81,26 +81,3 @@ RootWidget::~RootWidget()
 {
 
 }
-
-void RootWidget::closeEvent(QCloseEvent *event)
-{
-    QWidget::closeEvent(event);
-
-}
-
-void RootWidget::showEvent(QShowEvent *event)
-{
-    QWidget::showEvent(event);
-
-    Utils::RSLMInit();
-}
-
-void RootWidget::hideEvent(QHideEvent *event)
-{
-    QWidget::hideEvent(event);
-
-    receiverContent->reset();
-
-    Utils::RSLMShutdown();
-
-}

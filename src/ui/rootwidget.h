@@ -12,10 +12,6 @@ class RootWidget : public QWidget
 public:
     RootWidget(QWidget *parent = nullptr);
     ~RootWidget();
-protected:
-    void closeEvent(QCloseEvent *event) override;
-    void showEvent(QShowEvent *event) override;
-    void hideEvent(QHideEvent *event) override;
 private:
     ReceiverContent* receiverContent=nullptr;
 };
