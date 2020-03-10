@@ -31,6 +31,7 @@ public:
     float sceneScale() { return _sceneScale; }
     float timestamp;
     float playbackTimestamp;
+    void reset();
 private:
     float _sceneScale = 1.0;
     // prop id - json

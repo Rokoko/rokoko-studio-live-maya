@@ -1,3 +1,4 @@
+#include "constants.h"
 #include "utils.h"
 #include "infocontent.h"
 #include <QDesktopServices>
@@ -25,7 +26,8 @@ InfoContent::InfoContent(QWidget* parent) : QWidget(parent)
 
     QLabel* infoLabel = new QLabel(this);
     infoLabel->setWordWrap(true);
-    infoLabel->setText("Rokoko Studio Live for Maya v1.0.0\n\nDeveloped by Rokoko Electronics Aps");
+    QString infoText = QString("Rokoko Studio Live for Maya v%1.%2.%3\n\nDeveloped by Rokoko Electronics Aps").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH);
+    infoLabel->setText(infoText);
     infoLayout->addWidget(infoLabel, 0, Qt::AlignLeft);
     mainLayout->addLayout(infoLayout);
 

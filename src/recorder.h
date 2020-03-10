@@ -37,6 +37,7 @@ public:
     float recordingStartTime() {return mRecordingStartTime ;}
 
     QList<float> sortedTimeStamps();
+    void reset();
 private:
     // timestamp - set keyframe function
     QHash<float, QList<std::function<void(int)>>> recordedData;

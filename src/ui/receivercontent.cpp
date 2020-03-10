@@ -67,13 +67,16 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     formLayout->addRow("Scene scale:", sceneScaleBox);
     mainLayout->addLayout(formLayout);
 
-    // reset scene on stop option
-    QCheckBox* cbResetSceneOnStop = new QCheckBox("Reset Scene on Stop", this);
-    mainLayout->addWidget(cbResetSceneOnStop);
+    if(false)
+    {
+        // reset scene on stop option
+        QCheckBox* cbResetSceneOnStop = new QCheckBox("Reset Scene on Stop", this);
+        mainLayout->addWidget(cbResetSceneOnStop);
 
-    // hide meshes during play
-    QCheckBox* cbHideMeshesDuringPlay = new QCheckBox("Hide Meshes during Play", this);
-    mainLayout->addWidget(cbHideMeshesDuringPlay);
+        // hide meshes during play
+        QCheckBox* cbHideMeshesDuringPlay = new QCheckBox("Hide Meshes during Play", this);
+        mainLayout->addWidget(cbHideMeshesDuringPlay);
+    }
 
     // start receiver button
     ButtonParams receiverBtnParams;
@@ -141,6 +144,7 @@ ReceiverContent::~ReceiverContent()
     for(MCallbackId id : callbacks) {
         MSceneMessage::removeCallback(id);
     }
+    callbacks.clear();
 }
 
 

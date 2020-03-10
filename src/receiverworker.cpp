@@ -17,6 +17,11 @@ DataReceivingWorker::DataReceivingWorker(QObject* parent)
     hearbeat.start();
 }
 
+DataReceivingWorker::~DataReceivingWorker()
+{
+
+}
+
 void DataReceivingWorker::pause() {
     socket->abort();
 }

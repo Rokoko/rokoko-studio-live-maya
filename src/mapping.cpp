@@ -134,19 +134,7 @@ _Mapping::_Mapping()
     studioTPose["rightFoot"] = MQuaternion(-0.000, 0.707, -0.707, 0.000);
     studioTPose["rightToe"] = MQuaternion(0.000, 0.707, -0.707, 0.000);
 
-    // register callbacks
-    MCallbackId beforeNewId = MSceneMessage::addCheckCallback(MSceneMessage::kBeforeNewCheck, [](bool* recCode, void* clientData) {
-        Q_UNUSED(clientData)
-        Mapping::get()->clear();
-        *recCode = true;
-    });
-    MCallbackId beforeOpenId = MSceneMessage::addCheckCallback(MSceneMessage::kBeforeOpenCheck, [](bool* recCode, void* clientData) {
-        Q_UNUSED(clientData)
-        Mapping::get()->clear();
-        *recCode = true;
-    });
-    callbacks.append(beforeNewId);
-    callbacks.append(beforeOpenId);
+    installCallbacks();
 
     faceShapeNames << "eyeBlinkLeft"
                    << "eyeLookDownLeft"
@@ -681,11 +669,35 @@ void _Mapping::clear()
     objectsMap.clear();
 }
 
+void _Mapping::reset()
+{
+    clear();
+    resetCallbacks();
+}
+
+void _Mapping::installCallbacks()
+{
+    // register callbacks
+    MCallbackId beforeNewId = MSceneMessage::addCheckCallback(MSceneMessage::kBeforeNewCheck, [](bool* recCode, void* clientData) {
+        Q_UNUSED(clientData)
+        Mapping::get()->clear();
+        *recCode = true;
+    });
+    MCallbackId beforeOpenId = MSceneMessage::addCheckCallback(MSceneMessage::kBeforeOpenCheck, [](bool* recCode, void* clientData) {
+        Q_UNUSED(clientData)
+        Mapping::get()->clear();
+        *recCode = true;
+    });
+    callbacks.append(beforeNewId);
+    callbacks.append(beforeOpenId);
+}
+
 void _Mapping::resetCallbacks()
 {
     for(MCallbackId id : callbacks) {
         MSceneMessage::removeCallback(id);
     }
+    callbacks.clear();
 }
 
 const QMultiMap<QString, MObject> &_Mapping::getObjectMapping()

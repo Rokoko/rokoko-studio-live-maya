@@ -260,6 +260,14 @@ void _Animations::setSceneScale(float scale)
     _sceneScale = scale;
 }
 
+void _Animations::reset()
+{
+    propsMap.clear();
+    trackersMap.clear();
+    actorsMap.clear();
+    facesMap.clear();
+}
+
 void _Animations::animatePropOrTracker(QJsonObject obj, const MDagPath &dagPath)
 {
 //    bool isLive = obj["isLive"].toBool();

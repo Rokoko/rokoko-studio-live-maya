@@ -44,6 +44,9 @@ public:
     void unmapAllFaces(QString rsId);
 
     void clear();
+
+    void reset();
+    void installCallbacks();
     void resetCallbacks();
 
     const QMultiMap<QString, MObject> &getObjectMapping();

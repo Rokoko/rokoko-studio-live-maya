@@ -1,5 +1,9 @@
 #include "utils.h"
 
+#include "mapping.h"
+#include "animations.h"
+#include "recorder.h"
+
 #include <QString>
 #include <QHash>
 
@@ -48,4 +52,17 @@ void Utils::fillFaceWeightsMap(const MFnBlendShapeDeformer &bsFn, QHash<QString,
     if(plugFound == MStatus::kFailure) {
         printf("Failed to find weight attribute!!");
     }
+}
+
+void Utils::RSLMInit()
+{
+    Mapping::get()->installCallbacks();
+    Mapping::get()->syncMapping();
+}
+
+void Utils::RSLMShutdown()
+{
+    Recorder::get()->reset();
+    Mapping::get()->reset();
+    Animations::get()->reset();
 }

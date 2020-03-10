@@ -1,5 +1,8 @@
 #include <maya/MGlobal.h>
 
+#include "mapping.h"
+#include "utils.h"
+
 #include "ui/rootwidget.h"
 #include "ui/categoryheader.h"
 #include "ui/infocontent.h"
@@ -76,5 +79,28 @@ RootWidget::RootWidget(QWidget *parent)
 
 RootWidget::~RootWidget()
 {
+
+}
+
+void RootWidget::closeEvent(QCloseEvent *event)
+{
+    QWidget::closeEvent(event);
+
+}
+
+void RootWidget::showEvent(QShowEvent *event)
+{
+    QWidget::showEvent(event);
+
+    Utils::RSLMInit();
+}
+
+void RootWidget::hideEvent(QHideEvent *event)
+{
+    QWidget::hideEvent(event);
+
+    receiverContent->reset();
+
+    Utils::RSLMShutdown();
 
 }

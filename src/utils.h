@@ -13,6 +13,8 @@ public:
     static MVector rsToMaya(MVector);
     static MQuaternion rsToMaya(MQuaternion);
     static void fillFaceWeightsMap(const MFnBlendShapeDeformer &bsFn, QHash<QString, MPlug> &map);
+    static void RSLMInit();
+    static void RSLMShutdown();
 };
 
 
