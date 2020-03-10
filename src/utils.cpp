@@ -3,6 +3,7 @@
 #include "mapping.h"
 #include "animations.h"
 #include "recorder.h"
+#include "constants.h"
 
 #include <QString>
 #include <QHash>
@@ -52,6 +53,15 @@ void Utils::fillFaceWeightsMap(const MFnBlendShapeDeformer &bsFn, QHash<QString,
     if(plugFound == MStatus::kFailure) {
         printf("Failed to find weight attribute!!");
     }
+}
+
+void Utils::removeMayaWSControl()
+{
+    QString closeCmd = QString("if (`window -ex \"%1\"`); workspaceControl -e -close \"%1\";").arg(WORKSPACE_CONTROL_NAME);
+    QString deleteCmd = QString("if (`window -ex \"%1\"`); deleteUI -wnd \"%1\";").arg(WORKSPACE_CONTROL_NAME);
+
+    MGlobal::executeCommand(closeCmd.toStdString().c_str());
+    MGlobal::executeCommand(deleteCmd.toStdString().c_str());
 }
 
 void Utils::RSLMInit()
