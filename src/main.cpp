@@ -40,7 +40,7 @@ public:
             // do nothing if already visible
             if(rslmWidget->isVisible())
             {
-                std::cout << "Failed to open\n";
+                // std::cout << "Failed to open\n";
                 return MStatus::kFailure;
             }
         }

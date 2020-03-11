@@ -264,6 +264,10 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
                 Mapping::get()->unmapAllFaces(itemId);
             });
 
+            menu.addAction("Automap weights", [=](){
+                Mapping::get()->automapWeights(itemId);
+            });
+
         }
 
         menu.exec(treeWidget->mapToGlobal(pos));

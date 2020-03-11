@@ -1,8 +1,11 @@
 #include <iostream>
 #include "mapping.h"
 #include "utils.h"
+
 #include <QFile>
 #include <QTimer>
+#include <QRegExp>
+
 #include <maya/MFn.h>
 #include <maya/MGlobal.h>
 #include <maya/MDagPath.h>
@@ -10,6 +13,7 @@
 #include <maya/MPlug.h>
 #include <maya/MSelectionList.h>
 #include <maya/MFnDependencyNode.h>
+#include <maya/MFnBlendShapeDeformer.h>
 #include <maya/MFnCompoundAttribute.h>
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MItDependencyNodes.h>
@@ -226,15 +230,14 @@ void _Mapping::unmapRSObject(QString rsObjectID, bool selected=false)
             MObject object;
             MStatus dpNodeStatus = iter.getDependNode(object);
             if(dpNodeStatus != MStatus::kSuccess) {
-                std::cout << "FAILED TO FETCH MObject\n";
+                // std::cout << "FAILED TO FETCH MObject\n";
             }
             MFnDependencyNode node(object);
 
             if(objectsMap.contains(rsObjectID, object)) {
-                std::cout << "FOUND\n";
                 objectsMap.remove(rsObjectID, object);
             } else {
-                std::cout << "NOT FOUND\n";
+                // std::cout << "NOT FOUND\n";
             }
 
             iter.next();
@@ -245,13 +248,6 @@ void _Mapping::unmapRSObject(QString rsObjectID, bool selected=false)
             objectsMap.remove(rsObjectID);
         }
     }
-
-    auto objects = objectsMap.values(rsObjectID);
-    for(auto obj : objects) {
-        MFnDependencyNode node(obj);
-        std::cout << node.name() << " < ";
-    }
-    std::cout << "\n";
 }
 
 void _Mapping::selectObjects(QString rsObjectID)
@@ -283,7 +279,6 @@ void _Mapping::syncMapping()
             MStatus plugFound;
             MString rsIdValue = fn.findPlug(fieldName, plugFound).asString();
             objectsMap.insert(rsIdValue.asChar(), object);
-            std::cout << "sync object: " << rsIdValue.asChar() << "\n";
         }
         nodesIt.next();
     }
@@ -297,9 +292,8 @@ void _Mapping::syncMapping()
         bool mappingFound = fn.hasAttribute(faceMappingAttributeName);
         if(mappingFound) {
             // get rs id
-            MFnDependencyNode bsFn(object);
             MStatus plugFound;
-            MPlug faceMappingPlug = bsFn.findPlug(FACE_MAPPING_FILED_NAME.asChar(), true, &plugFound);
+            MPlug faceMappingPlug = fn.findPlug(FACE_MAPPING_FILED_NAME.asChar(), true, &plugFound);
             if (!faceMappingPlug.isNull()) {
                 if(faceMappingPlug.isCompound()) {
                     unsigned int numChildren = faceMappingPlug.numChildren();
@@ -315,7 +309,6 @@ void _Mapping::syncMapping()
                     {
                         MString faceId = faceIdPlug.asString();
                         objectsMap.insert(faceId.asChar(), object);
-                        std::cout << "sync face: " << faceId.asChar() << "\n";
                     }
                 }
             }
@@ -535,60 +528,8 @@ void _Mapping::mapFaceToMayaObject(QString mayaObjecName, QString rsId)
         // create shapes string attributes
         fn.addAttribute(compoundObj);
 
-        // set values
         Local::setAttributeString(fn, "FaceId", rsId.toStdString().c_str());
-        Local::setAttributeString(fn, "eyeBlinkLeft", "eyeBlinkLeft");
-        Local::setAttributeString(fn, "eyeLookDownLeft", "eyeLookDownLeft");
-        Local::setAttributeString(fn, "eyeLookInLeft", "eyeLookInLeft");
-        Local::setAttributeString(fn, "eyeLookOutLeft", "eyeLookOutLeft");
-        Local::setAttributeString(fn, "eyeLookUpLeft", "eyeLookUpLeft");
-        Local::setAttributeString(fn, "eyeSquintLeft", "eyeSquintLeft");
-        Local::setAttributeString(fn, "eyeWideLeft", "eyeWideLeft");
-        Local::setAttributeString(fn, "eyeBlinkRight", "eyeBlinkRight");
-        Local::setAttributeString(fn, "eyeLookDownRight", "eyeLookDownRight");
-        Local::setAttributeString(fn, "eyeLookInRight", "eyeLookInRight");
-        Local::setAttributeString(fn, "eyeLookOutRight", "eyeLookOutRight");
-        Local::setAttributeString(fn, "eyeLookUpRight", "eyeLookUpRight");
-        Local::setAttributeString(fn, "eyeSquintRight", "eyeSquintRight");
-        Local::setAttributeString(fn, "eyeWideRight", "eyeWideRight");
-        Local::setAttributeString(fn, "jawForward", "jawForward");
-        Local::setAttributeString(fn, "jawLeft", "jawLeft");
-        Local::setAttributeString(fn, "jawRight", "jawRight");
-        Local::setAttributeString(fn, "jawOpen", "jawOpen");
-        Local::setAttributeString(fn, "mouthClose", "mouthClose");
-        Local::setAttributeString(fn, "mouthFunnel", "mouthFunnel");
-        Local::setAttributeString(fn, "mouthPucker", "mouthPucker");
-        Local::setAttributeString(fn, "mouthLeft", "mouthLeft");
-        Local::setAttributeString(fn, "mouthRight", "mouthRight");
-        Local::setAttributeString(fn, "mouthSmileLeft", "mouthSmileLeft");
-        Local::setAttributeString(fn, "mouthSmileRight", "mouthSmileRight");
-        Local::setAttributeString(fn, "mouthFrownLeft", "mouthFrownLeft");
-        Local::setAttributeString(fn, "mouthFrownRight", "mouthFrownRight");
-        Local::setAttributeString(fn, "mouthDimpleLeft", "mouthDimpleLeft");
-        Local::setAttributeString(fn, "mouthDimpleRight", "mouthDimpleRight");
-        Local::setAttributeString(fn, "mouthStretchLeft", "mouthStretchLeft");
-        Local::setAttributeString(fn, "mouthStretchRight", "mouthStretchRight");
-        Local::setAttributeString(fn, "mouthRollLower", "mouthRollLower");
-        Local::setAttributeString(fn, "mouthRollUpper", "mouthRollUpper");
-        Local::setAttributeString(fn, "mouthShrugLower", "mouthShrugLower");
-        Local::setAttributeString(fn, "mouthShrugUpper", "mouthShrugUpper");
-        Local::setAttributeString(fn, "mouthPressLeft", "mouthPressLeft");
-        Local::setAttributeString(fn, "mouthPressRight", "mouthPressRight");
-        Local::setAttributeString(fn, "mouthLowerDownLeft", "mouthLowerDownLeft");
-        Local::setAttributeString(fn, "mouthLowerDownRight", "mouthLowerDownRight");
-        Local::setAttributeString(fn, "mouthUpperUpLeft", "mouthUpperUpLeft");
-        Local::setAttributeString(fn, "mouthUpperUpRight", "mouthUpperUpRight");
-        Local::setAttributeString(fn, "browDownLeft", "browDownLeft");
-        Local::setAttributeString(fn, "browDownRight", "browDownRight");
-        Local::setAttributeString(fn, "browInnerUp", "browInnerUp");
-        Local::setAttributeString(fn, "browOuterUpLeft", "browOuterUpLeft");
-        Local::setAttributeString(fn, "browOuterUpRight", "browOuterUpRight");
-        Local::setAttributeString(fn, "cheekPuff", "cheekPuff");
-        Local::setAttributeString(fn, "cheekSquintLeft", "cheekSquintLeft");
-        Local::setAttributeString(fn, "cheekSquintRight", "cheekSquintRight");
-        Local::setAttributeString(fn, "noseSneerLeft", "noseSneerLeft");
-        Local::setAttributeString(fn, "noseSneerRight", "noseSneerRight");
-        Local::setAttributeString(fn, "tongueOut", "tongueOut");
+
     }
 
     syncMapping();
@@ -661,6 +602,77 @@ void _Mapping::unmapAllFaces(QString rsId)
             }
         }
         bsIterator.next();
+    }
+}
+
+void _Mapping::automapWeights(QString rsId)
+{
+
+    // printf("Automap face\n");
+    auto compareFaceWeightNames = [](QString studioName, QString foreignName) -> bool {
+        QRegExp exp("[^A-Za-z]");
+        QString strippedForeignName = foreignName.remove(exp);
+        return strippedForeignName.toLower().contains(studioName.toLower());
+    };
+
+    // iterate over all blend shape nodes with this item id
+    // try to put existing weight names into correct RS shape name field
+    MItDependencyNodes bsIt(MFn::kBlendShape);
+    while(!bsIt.isDone()) {
+        MObject object = bsIt.thisNode();
+        MFnBlendShapeDeformer fn(object);
+        MString faceMappingAttributeName(FACE_MAPPING_FILED_NAME.asChar());
+        bool mappingFound = fn.hasAttribute(faceMappingAttributeName);
+        if(mappingFound) {
+            // get rs id
+            MStatus plugFound;
+            MPlug faceMappingPlug = fn.findPlug(FACE_MAPPING_FILED_NAME.asChar(), true, &plugFound);
+            if (!faceMappingPlug.isNull()) {
+                if(faceMappingPlug.isCompound()) {
+                    unsigned int numChildren = faceMappingPlug.numChildren();
+                    MPlug faceIdPlug;
+                    for (unsigned int i = 0; i < numChildren; ++i) {
+                        MPlug childPlug = faceMappingPlug.child(i);
+                        if(childPlug.partialName() == PREFIXED_FACE_ID) {
+                            faceIdPlug = childPlug;
+                            break;
+                        }
+                    }
+
+                    MString faceId = faceIdPlug.asString();
+                    if(faceId.asChar() == rsId) {
+                        for(const QString& studioName : faceShapeNames)
+                        {
+                            QHash<QString, MPlug> weights;
+                            Utils::fillFaceWeightsMap(fn, weights);
+                            const QStringList weightNames = weights.keys();
+                            for(const QString &foreignName : weightNames) {
+                                if(compareFaceWeightNames(studioName, foreignName)) {
+                                    // put
+                                    QString prefixedStudioName = BLEND_SHAPE_PREFIX.asChar() + studioName;
+                                    MPlug mappingShapePlug = fn.findPlug(prefixedStudioName.toStdString().c_str(), false);
+                                    MStatus success = mappingShapePlug.setValue(foreignName.toStdString().c_str());
+                                    if(success == MStatus::kSuccess) {
+                                        //printf("Mapped\n");
+                                    } else {
+                                        //printf("Not mapped\n");
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        //printf("Invalid face id %s - %s\n", faceId.asChar(), rsId.toStdString().c_str());
+                        //printf("%d\n", QString(faceId.asChar()) == rsId);
+                    }
+                }
+            } else {
+                //printf("face mapping not found\n");
+            }
+        } else {
+            //printf("Mapping not found\n");
+        }
+
+        bsIt.next();
     }
 }
 
