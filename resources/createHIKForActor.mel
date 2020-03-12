@@ -1,3 +1,11 @@
+if (!`pluginInfo -q -l "mayaHIK"`) { loadPlugin "mayaHIK"; }
+if (!`pluginInfo -q -l "mayaCharacterization"`) { loadPlugin "mayaCharacterization"; }
+if (!`pluginInfo -q -l "OneClick"`) { loadPlugin "OneClick"; }
+
+// ensure hik plugins are loaded
+
+hikCreateCharacterControlsDockableWindow;
+
 proc string rkk_createHikActor() {
     string $sceneChars[] = hikGetSceneCharacters();
 
