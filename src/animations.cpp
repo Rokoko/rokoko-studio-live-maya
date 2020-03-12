@@ -69,17 +69,17 @@ QHash<QString, QJsonObject> &_Animations::getFaces()
 void _Animations::applyAnimationsToMappedObjects()
 {
     const QMultiMap<QString, MString> objectMapping = Mapping::get()->getObjectMapping();
+    const QMultiMap<QString, MObject> faceObjectMapping = Mapping::get()->getFaceObjectMapping();
     const QHash<QString, QString> mayaToRsBoneNames = Mapping::get()->getBoneMapping();
     const QHash<QString, MQuaternion> studioTPose = Mapping::get()->getStudioTPose();
 
-    QList<QString> allIds = objectMapping.keys();
+    QStringList allIds = objectMapping.keys();
     for(const QString &rsId : allIds) {
         auto it = objectMapping.find(rsId);
         // std::cout << "cnt: " << objectMapping.count(rsId) << std::endl;
         if(it != objectMapping.end()) {
             while(it != objectMapping.end())
             {
-                QString rsId = it.key();
                 MString objectPathString = it.value();
 
                 MSelectionList ls;
@@ -111,45 +111,6 @@ void _Animations::applyAnimationsToMappedObjects()
                     // apply trackers animations
                     QJsonObject trackerObject = trackersMap[rsId];
                     animatePropOrTracker(trackerObject, dagPath);
-
-                } else if(facesMap.contains(rsId)) {
-                    // apply face animations
-
-                    const QStringList faceShapeNames = Mapping::get()->getFaceShapeNames();
-                    // get input data for this face
-                    QJsonObject faceObject = facesMap[rsId];
-
-                    // access mapped blendshape node
-                    MFnBlendShapeDeformer faceFn(object);
-
-                    // TODO: run this once when receiver stared
-                    // prepare weight weight name to attribute plug map
-                    QHash <QString, MPlug> weightsMap;
-                    Utils::fillFaceWeightsMap(faceFn, weightsMap);
-
-                    // for each studio shape name set weight value
-                    for(QString studioShapeName : faceShapeNames) {
-                        double weight = faceObject[studioShapeName].toDouble() * 0.01;
-
-                        MString bsFieldName = BLEND_SHAPE_PREFIX + studioShapeName.toStdString().c_str();
-                        MStatus fieldPlugStatus;
-                        MPlug weightAttr = faceFn.findPlug(bsFieldName, true, &fieldPlugStatus);
-                        if(fieldPlugStatus == MStatus::kSuccess) {
-                            MString mappedName;
-                            weightAttr.getValue(mappedName);
-                            if(weightsMap.contains(mappedName.asChar())) {
-                                MPlug weightPlug = weightsMap[mappedName.asChar()];
-                                weightPlug.setDouble(weight);
-                                if(recordingEnabled) {
-
-                                    // this functions will be called later
-                                    Recorder::get()->recordFace(timestamp, [object, weight, weightPlug](int frame) {
-                                        Recorder::get()->keyframeNumericAttribute(frame, weightPlug, weight);
-                                    });
-                                }
-                            }
-                        }
-                    }
 
                 } else if(actorsMap.contains(rsId)) {
                     // apply actor animations
@@ -248,6 +209,67 @@ void _Animations::applyAnimationsToMappedObjects()
                 }
 
                 ++it;
+            }
+        }
+
+    }
+
+    QStringList faceIds = faceObjectMapping.keys();
+    printf("Num face objects: %d\n", faceObjectMapping.values().count());
+    for(QString &rsId : faceIds) {
+        auto faceIt = faceObjectMapping.find(rsId);
+        if(faceIt != faceObjectMapping.end()) {
+            while(faceIt != faceObjectMapping.end())
+            {
+                if(facesMap.contains(rsId)) {
+                    // apply face animations
+
+                    MObject object = faceIt.value();
+
+//                    if(object.isNull()) {
+//                        stopReceiverCallback();
+//                        Mapping::get()->syncMapping();
+//                        break;
+//                    }
+
+                    const QStringList faceShapeNames = Mapping::get()->getFaceShapeNames();
+                    // get input data for this face
+                    QJsonObject faceObject = facesMap[rsId];
+
+                    // access mapped blendshape node
+                    MFnBlendShapeDeformer faceFn(object);
+
+                    // TODO: run this once when receiver stared
+                    // prepare weight weight name to attribute plug map
+                    QHash <QString, MPlug> weightsMap;
+                    Utils::fillFaceWeightsMap(faceFn, weightsMap);
+
+                    // for each studio shape name set weight value
+                    for(QString studioShapeName : faceShapeNames) {
+                        double weight = faceObject[studioShapeName].toDouble() * 0.01;
+
+                        MString bsFieldName = BLEND_SHAPE_PREFIX + studioShapeName.toStdString().c_str();
+                        MStatus fieldPlugStatus;
+                        MPlug weightAttr = faceFn.findPlug(bsFieldName, true, &fieldPlugStatus);
+                        if(fieldPlugStatus == MStatus::kSuccess) {
+                            MString mappedName;
+                            weightAttr.getValue(mappedName);
+                            if(weightsMap.contains(mappedName.asChar())) {
+                                MPlug weightPlug = weightsMap[mappedName.asChar()];
+                                weightPlug.setDouble(weight);
+                                if(recordingEnabled) {
+
+                                    // this functions will be called later
+                                    Recorder::get()->recordFace(timestamp, [object, weight, weightPlug](int frame) {
+                                        Recorder::get()->keyframeNumericAttribute(frame, weightPlug, weight);
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                }
+                ++faceIt;
             }
         }
     }
