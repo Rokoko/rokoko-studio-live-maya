@@ -54,7 +54,7 @@ something in maya and this selection will be considered by context menu actions.
 
 After starting the receiver, select the object in maya viewport that
 you want to associate with studio object. Right click on studio object in tree view
-and select `"Map to selected objects"` entry.
+and select `Map to selected objects` entry.
 ![mapProp](images/mapProp.gif)
 
 ### Stop streaming (Unmap objects)
@@ -70,8 +70,8 @@ instead.
 ## Streaming character data
 
 After starting the receiver, right click on character studio object in tree view
-and select `"Create HIK skeleton"`. Once new skeleton created select, right click character again
-and select `"Map to active character"`. Currently active character in HIK panel will be mapped.
+and select `Create HIK skeleton`. Once new skeleton created select, right click character again
+and select `Map to active character`. Currently active character in HIK panel will be mapped.
 
 ![mapCharacters](images/mapCharacters.gif)
 
@@ -81,12 +81,12 @@ and set studio mapped character as source.
 ## Streaming face data
 
 After starting the receiver, select geometry in maya viewport that hosts face blend shapes, right click on face studio object in tree view
-and select `"Map to selected objects"`. After face geometry is mapped you need to map weight names, to do
-that right click face studio object again and select `"Automap weights"`.
+and select `Map to selected objects`. After face geometry is mapped you need to map weight names, to do
+that right click face studio object again and select `Automap weights`.
 ![faceMapping](images/faceMapping.gif)
 
 # Recording
-To record objects, hit `"Start Recording"` button. All mapped objects will be recorded into keyframes.
+To record objects, hit `Start Recording` button. All mapped objects will be recorded into keyframes.
 ![rec](images/recording.gif)
 
 > **NOTE**: Maya's current frame will be considered. Recorded frame range displayed in the right side of record button.
