@@ -15,6 +15,7 @@ class DataReceivingWorker : public QObject
     Q_OBJECT
 public:
     DataReceivingWorker(QObject* parent=nullptr);
+    ~DataReceivingWorker();
 public slots:
     void start(int port=DEFAULT_RS_PORT);
     void pause();

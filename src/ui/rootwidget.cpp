@@ -1,5 +1,8 @@
 #include <maya/MGlobal.h>
 
+#include "mapping.h"
+#include "utils.h"
+
 #include "ui/rootwidget.h"
 #include "ui/categoryheader.h"
 #include "ui/infocontent.h"

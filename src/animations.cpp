@@ -75,7 +75,7 @@ void _Animations::applyAnimationsToMappedObjects()
     QList<QString> allIds = objectMapping.keys();
     for(QString rsId : allIds) {
         auto it = objectMapping.find(rsId);
-//        std::cout << "cnt: " << objectMapping.count(rsId) << std::endl;
+        // std::cout << "cnt: " << objectMapping.count(rsId) << std::endl;
         if(it != objectMapping.end()) {
             while(it != objectMapping.end())
             {
@@ -95,7 +95,7 @@ void _Animations::applyAnimationsToMappedObjects()
 
                     QJsonObject propObject = propsMap[rsId];
                     animatePropOrTracker(propObject, dagPath);
-//                    printf("prop animated %s - %s\n", dagPath.partialPathName().asChar(), rsId.toStdString().c_str());
+                    // printf("prop animated %s - %s\n", dagPath.partialPathName().asChar(), rsId.toStdString().c_str());
 
                 } else if(trackersMap.contains(rsId)) {
 
@@ -258,6 +258,14 @@ void _Animations::recordingToggled(bool enabled)
 void _Animations::setSceneScale(float scale)
 {
     _sceneScale = scale;
+}
+
+void _Animations::reset()
+{
+    propsMap.clear();
+    trackersMap.clear();
+    actorsMap.clear();
+    facesMap.clear();
 }
 
 void _Animations::animatePropOrTracker(QJsonObject obj, const MDagPath &dagPath)

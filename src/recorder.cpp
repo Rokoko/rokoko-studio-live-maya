@@ -98,3 +98,8 @@ QList<float> _Recorder::sortedTimeStamps()
     std::sort(timestamps.begin(), timestamps.end());
     return timestamps;
 }
+
+void _Recorder::reset()
+{
+    recordedData.clear();
+}

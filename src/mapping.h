@@ -42,8 +42,12 @@ public:
     void mapFaceToMayaObject(QString mayaObjecName,  QString rsId);
     void unmapFaceFromMayaObject(QString mayaObjecName="");
     void unmapAllFaces(QString rsId);
+    void automapWeights(QString rsId);
 
     void clear();
+
+    void reset();
+    void installCallbacks();
     void resetCallbacks();
 
     const QMultiMap<QString, MObject> &getObjectMapping();

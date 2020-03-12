@@ -17,6 +17,8 @@ class ReceiverContent : public QWidget
 public:
     ReceiverContent(QWidget* parent=nullptr);
     ~ReceiverContent();
+
+    void reset();
 private:
     void onReceiverToggled(bool);
     QSpinBox* portBox=nullptr;
@@ -29,7 +31,6 @@ private:
     void recordingToggled(bool checked);
     void populateTree();
     void clearTreeWidget();
-    void reset();
 
     MCallbackIdArray callbacks;
 };
