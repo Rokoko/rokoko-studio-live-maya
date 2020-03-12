@@ -290,6 +290,7 @@ void ReceiverContent::populateTree()
 {
     QTimer::singleShot(250, [&](){
         // populate props
+        treeWidget->clear();
         auto props = Animations::get()->getProps();
         QHash<QString, QTreeWidgetItem*> propsItemMap;
         foreach(auto prop, props) {
