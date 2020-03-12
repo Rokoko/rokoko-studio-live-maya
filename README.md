@@ -94,3 +94,26 @@ To record objects, hit `"Start Recording"` button. All mapped objects will be re
 
 # How mapping works
 
+General approach used to map objects are maya's custom attributes. Custom attributes
+is native thing and they are saved with maya scenes. Which means that our mapping information
+will be preserved across maya sessions.
+
+For each object we create slightly different attributes.
+
+## Props and trackers
+
+In case of props and trackers we just add studio a single field with identifier.
+![propID](images/propID.png)
+
+## Characters
+In case of characters we map skeleton root bone (Hip). The rest of the bones will
+be automatically detected during animation.
+![charID](images/charID.png)
+> **WARN**: Do not try to map custom skeletons. Plugin able to work only with hik generated skeletons
+
+## Faces
+In case of faces we map blendshape nodes that connected to geometry. Custom compound attribute
+will be added to each node. Besides face ID, we add 53 extra fields for each studio face shape.
+![faceIDA](images/faceIDA.png)
+This fields used to map blendshape's existing weight names.
+![faceIDA](images/faceIDB.png)
