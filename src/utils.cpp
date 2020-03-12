@@ -9,6 +9,8 @@
 #include <QHash>
 
 #include <maya/MGlobal.h>
+#include <maya/MSelectionList.h>
+#include <maya/MDagPath.h>
 #include <maya/MFnBlendShapeDeformer.h>
 #include <maya/MString.h>
 #include <maya/MPlug.h>
@@ -82,4 +84,12 @@ void Utils::RSLMShutdown()
     Recorder::get()->reset();
     Mapping::get()->reset();
     Animations::get()->reset();
+}
+
+void Utils::getObjectFromString(const MString &fullPath, MObject &object, MDagPath &path, MStatus &result)
+{
+    MSelectionList ls;
+    ls.add(fullPath);
+    result = ls.getDagPath(0, path);
+    result = ls.getDependNode(0, object);
 }

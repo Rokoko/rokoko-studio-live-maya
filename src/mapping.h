@@ -50,13 +50,13 @@ public:
     void installCallbacks();
     void resetCallbacks();
 
-    const QMultiMap<QString, MObject> &getObjectMapping();
+    const QMultiMap<QString, MString> &getObjectMapping();
     const QHash<QString, QString> &getBoneMapping();
     const QHash<QString, MQuaternion> &getStudioTPose();
     const QStringList &getFaceShapeNames() { return faceShapeNames; };
 private:
     // prop id - maya object
-    QMultiMap<QString, MObject> objectsMap;
+    QMultiMap<QString, MString> objectsMap;
     // maya hik bone name to rs bone name
     QHash<QString, QString> boneMapping;
     // studio t-pose

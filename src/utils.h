@@ -17,6 +17,7 @@ public:
     static void removeMayaWSControl();
     static void RSLMInit();
     static void RSLMShutdown();
+    static void getObjectFromString(const MString &fullPath, MObject &object, MDagPath &path, MStatus &result);
 };
 
 

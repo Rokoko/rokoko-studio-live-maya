@@ -27,6 +27,8 @@ public:
 
     void recordingToggled(bool enabled);
 
+    void setStopReceiverCallback(std::function<void()> foo) { stopReceiverCallback = foo; }
+
     void setSceneScale(float);
     float sceneScale() { return _sceneScale; }
     float timestamp;
@@ -46,6 +48,7 @@ private:
     void animatePropOrTracker(QJsonObject obj, const MDagPath &dagPath);
 
     bool recordingEnabled = false;
+    std::function<void()> stopReceiverCallback = [](){};
 };
 
 typedef Singleton<_Animations> Animations;
