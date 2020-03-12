@@ -84,3 +84,13 @@ After starting the receiver, select geometry in maya viewport that hosts face bl
 and select `"Map to selected objects"`. After face geometry is mapped you need to map weight names, to do
 that right click face studio object again and select `"Automap weights"`.
 ![faceMapping](images/faceMapping.gif)
+
+# Recording
+To record objects, hit `"Start Recording"` button. All mapped objects will be recorded into keyframes.
+![rec](images/recording.gif)
+
+> **NOTE**: Maya's current frame will be considered. Recorded frame range displayed in the right side of record button.
+> If you make new recording on top of previous, keyframes will be updated.
+
+# How mapping works
+
