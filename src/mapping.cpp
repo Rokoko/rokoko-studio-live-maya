@@ -221,33 +221,7 @@ void _Mapping::unmapRSObject(QString rsObjectID, bool selected=false)
     cmdString.replace("SELECTED_ONLY", selected ? "true" : "false");
     MGlobal::executeCommand(cmdString.toStdString().c_str());
 
-    // remove objects from mapping
-    if(selected) {
-        MSelectionList ls;
-        MGlobal::getActiveSelectionList(ls);
-        MItSelectionList iter(ls);
-        while(!iter.isDone()) {
-            MObject object;
-            MStatus dpNodeStatus = iter.getDependNode(object);
-            if(dpNodeStatus != MStatus::kSuccess) {
-                // std::cout << "FAILED TO FETCH MObject\n";
-            }
-            MFnDependencyNode node(object);
-
-            if(objectsMap.contains(rsObjectID, object)) {
-                objectsMap.remove(rsObjectID, object);
-            } else {
-                // std::cout << "NOT FOUND\n";
-            }
-
-            iter.next();
-        }
-    } else {
-        // remove all maya objects associated with this rsId
-        if(objectsMap.contains(rsObjectID)) {
-            objectsMap.remove(rsObjectID);
-        }
-    }
+    syncMapping();
 }
 
 void _Mapping::selectObjects(QString rsObjectID)
@@ -278,7 +252,10 @@ void _Mapping::syncMapping()
         {
             MStatus plugFound;
             MString rsIdValue = fn.findPlug(fieldName, plugFound).asString();
-            objectsMap.insert(rsIdValue.asChar(), object);
+
+            MDagPath path;
+            MDagPath::getAPathTo(object, path);
+            objectsMap.insert(rsIdValue.asChar(), path.fullPathName());
         }
         nodesIt.next();
     }
@@ -308,7 +285,9 @@ void _Mapping::syncMapping()
                     if(!faceIdPlug.isNull())
                     {
                         MString faceId = faceIdPlug.asString();
-                        objectsMap.insert(faceId.asChar(), object);
+                        MDagPath path;
+                        MDagPath::getAPathTo(object, path);
+                        objectsMap.insert(faceId.asChar(), path.fullPathName().asChar());
                     }
                 }
             }
@@ -341,7 +320,7 @@ bool _Mapping::mapActorToCurrentMayaCharacter(QString actorID)
     hipsLs.getDependNode(0, hipsObject);
     hipsLs.getDagPath(0, hipsDagPath);
     // map rs character id to this character hips object adding RokokoMapping custom attribute to it
-    objectsMap.insert(actorID, hipsObject);
+    objectsMap.insert(actorID, hipsDagPath.fullPathName());
     // append custom attribute to hips joint
     Mapping::get()->setOrCreateRSIdAttribute(hipsDagPath.fullPathName().asChar(), actorID);
     return true;
@@ -712,7 +691,7 @@ void _Mapping::resetCallbacks()
     callbacks.clear();
 }
 
-const QMultiMap<QString, MObject> &_Mapping::getObjectMapping()
+const QMultiMap<QString, MString> &_Mapping::getObjectMapping()
 {
     return objectsMap;
 }

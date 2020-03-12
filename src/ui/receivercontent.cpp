@@ -136,6 +136,8 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     }, this);
     callbacks.append(beforeNewId);
     callbacks.append(beforeOpenId);
+
+    Animations::get()->setStopReceiverCallback(std::bind(&ReceiverContent::reset, this));
 }
 
 ReceiverContent::~ReceiverContent()
@@ -207,7 +209,11 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
                     QStringList mappedHipJoints;
                     // populate mapped character root bones
                     while(it != objectMapping.end() && it.key() == currentChar) {
-                        MFnDagNode node(it.value());
+
+                        MObject object; MDagPath path; MStatus result;
+                        Utils::getObjectFromString(it.value(), object, path, result);
+
+                        MFnDagNode node(object);
                         QString temp(node.name().asChar());
                         mappedHipJoints << temp.split("_").takeFirst();
                         ++it;

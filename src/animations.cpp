@@ -68,7 +68,7 @@ QHash<QString, QJsonObject> &_Animations::getFaces()
 
 void _Animations::applyAnimationsToMappedObjects()
 {
-    const QMultiMap<QString, MObject> objectMapping = Mapping::get()->getObjectMapping();
+    const QMultiMap<QString, MString> objectMapping = Mapping::get()->getObjectMapping();
     const QHash<QString, QString> mayaToRsBoneNames = Mapping::get()->getBoneMapping();
     const QHash<QString, MQuaternion> studioTPose = Mapping::get()->getStudioTPose();
 
@@ -80,12 +80,21 @@ void _Animations::applyAnimationsToMappedObjects()
             while(it != objectMapping.end())
             {
                 QString rsId = it.key();
-                MObject object = it.value();
+                MString objectPathString = it.value();
 
-                if(rsId.isEmpty() || object.isNull()) {
-                    ++it;
-                    continue;
+                MSelectionList ls;
+                ls.add(objectPathString);
+                MDagPath objectPath;
+                MStatus found = ls.getDagPath(0, objectPath);
+
+                if(found != MStatus::kSuccess) {
+                    // node was removed during iteration
+                    stopReceiverCallback();
+                    Mapping::get()->syncMapping();
+                    break;
                 }
+
+                MObject object = objectPath.node();
 
                 MDagPath dagPath;
                 MDagPath::getAPathTo(object, dagPath);
