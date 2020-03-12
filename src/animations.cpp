@@ -73,20 +73,20 @@ void _Animations::applyAnimationsToMappedObjects()
     const QHash<QString, MQuaternion> studioTPose = Mapping::get()->getStudioTPose();
 
     QList<QString> allIds = objectMapping.keys();
-    for(QString rsId : allIds) {
+    for(const QString &rsId : allIds) {
         auto it = objectMapping.find(rsId);
         // std::cout << "cnt: " << objectMapping.count(rsId) << std::endl;
         if(it != objectMapping.end()) {
             while(it != objectMapping.end())
             {
                 QString rsId = it.key();
+                MObject object = it.value();
 
-                if(rsId.isEmpty()) {
+                if(rsId.isEmpty() || object.isNull()) {
                     ++it;
                     continue;
                 }
 
-                MObject object = it.value();
                 MDagPath dagPath;
                 MDagPath::getAPathTo(object, dagPath);
 
