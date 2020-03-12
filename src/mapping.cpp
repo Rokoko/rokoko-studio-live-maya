@@ -240,6 +240,7 @@ void _Mapping::syncMapping()
 {
     // erase all
     objectsMap.clear();
+    faceObjectsMap.clear();
 
     // sync transform nodes
     MItDependencyNodes nodesIt(MFn::kTransform);
@@ -285,9 +286,7 @@ void _Mapping::syncMapping()
                     if(!faceIdPlug.isNull())
                     {
                         MString faceId = faceIdPlug.asString();
-                        MDagPath path;
-                        MDagPath::getAPathTo(object, path);
-                        objectsMap.insert(faceId.asChar(), path.fullPathName().asChar());
+                        faceObjectsMap.insert(faceId.asChar(), object);
                     }
                 }
             }
@@ -658,6 +657,7 @@ void _Mapping::automapWeights(QString rsId)
 void _Mapping::clear()
 {
     objectsMap.clear();
+    faceObjectsMap.clear();
 }
 
 void _Mapping::reset()
@@ -694,6 +694,11 @@ void _Mapping::resetCallbacks()
 const QMultiMap<QString, MString> &_Mapping::getObjectMapping()
 {
     return objectsMap;
+}
+
+const QMultiMap<QString, MObject> &_Mapping::getFaceObjectMapping()
+{
+    return faceObjectsMap;
 }
 
 const QHash<QString, QString> &_Mapping::getBoneMapping()
