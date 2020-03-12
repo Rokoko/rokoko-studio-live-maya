@@ -102,7 +102,7 @@ For each object we create slightly different attributes.
 
 ## Props and trackers
 
-In case of props and trackers we just add studio a single field with identifier.
+In case of props and trackers we just add a single field with identifier.
 ![propID](images/propID.png)
 
 ## Characters
