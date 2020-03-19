@@ -1,0 +1,33 @@
+TEMPLATE = lib
+CONFIG -= debug
+CONFIG += qt warn_on plugin
+
+
+DEFINES		+= CC_GNU_ OSMac_ OSMac_ _LANGUAGE_C_PLUS_PLUS
+INCLUDEPATH	+= .. "$${DEVKIT_LOCATION}/include"
+TARGET_EXT	= bundle
+QMAKE_EXTENSION_SHLIB	= bundle
+
+QMAKE_CC	= clang
+QMAKE_CXX	= clang++
+
+_CFLAGS		= -O3
+QMAKE_CFLAGS	+= $${_CFLAGS}
+
+QMAKE_CXXFLAGS	+= $${_CFLAGS} -stdlib=libc++ $(WARNFLAGS) $(ERROR_FLAGS) \
+                        -fno-gnu-keywords -fpascal-strings
+
+_DYNLIB_LOCATION	= $$(DEVKIT_LOCATION)/lib
+
+LIBS		+= -L"$${_DYNLIB_LOCATION}" -lOpenMaya -lOpenMayaUI -lFoundation -lOpenMayaRender -lOpenMayaAnim \
+                        -framework System -framework CoreServices \
+                        -framework SystemConfiguration \
+                        -framework Carbon -framework Cocoa \
+                        -framework ApplicationServices \
+                        -framework IOKit
+
+QMAKE_LFLAGS	+= -stdlib=libc++ -fno-gnu-keywords -fpascal-strings -dynamiclib
+
+QMAKE_LINK		= $${QMAKE_CXX}
+
+MAKEFILE = $${TARGET}.mak

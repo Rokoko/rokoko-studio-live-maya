@@ -1,0 +1,29 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/arrow.svg</file>
+        <file>resources/style.qss</file>
+        <file>resources/icon-studio-live-32.png</file>
+        <file>resources/pause.svg</file>
+        <file>resources/play.svg</file>
+        <file>resources/icon-record-32.png</file>
+        <file>resources/icon-stop-white-32.png</file>
+        <file>resources/icon-restart-32.png</file>
+        <file>resources/icon-straight-pose-32.png</file>
+        <file>resources/update.svg</file>
+        <file>resources/paper.svg</file>
+        <file>resources/icon-vp-32.png</file>
+        <file>resources/cube.png</file>
+        <file>resources/icon-rokoko-32.png</file>
+        <file>resources/icon-row-suit-32.png</file>
+        <file>resources/icon-row-face-32.png</file>
+        <file>resources/icon-paired-32.png</file>
+        <file>resources/mapToSelectedObjects.mel</file>
+        <file>resources/unmapRSObject.mel</file>
+        <file>resources/selectMappedObjects.mel</file>
+        <file>resources/createHIKForActor.mel</file>
+        <file>resources/setOrCreateRSIdAttribute.mel</file>
+        <file>resources/deleteMappingAttribute.mel</file>
+        <file>resources/createFaceAttributes.mel</file>
+        <file>resources/fetchBlendShapes.mel</file>
+    </qresource>
+</RCC>

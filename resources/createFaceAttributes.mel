@@ -1,0 +1,87 @@
+string $bsHostNode = "MAYA_OBJECT_NAME";
+
+
+proc _createFaceAttrs(string $bsNode) {
+    if(!`objExists $bsNode`) {
+        print("Node not found" + $bsNode + "\n");
+        return;
+    }
+
+    string $faceMappingName = "FACE_MAPPING_FILED_NAME";
+    int $faceAttrExists = `attributeExists $faceMappingName $bsNode`;
+
+    if ($faceAttrExists) {
+        // already been created
+        print("Face mapping already been created!\n");
+        return;
+    } else {
+        // create compound attribute with 53 child attributes
+        
+        addAttr -longName $faceMappingName -numberOfChildren 53 -attributeType compound $bsNode;
+        addAttr -dt "string" -longName "FaceId" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "eyeBlinkLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "eyeLookDownLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "eyeLookInLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "eyeLookOutLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "eyeLookUpLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "eyeSquintLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "eyeWideLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "eyeBlinkRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "eyeLookDownRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "eyeLookInRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "eyeLookOutRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "eyeLookUpRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "eyeSquintRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "eyeWideRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "jawForward" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "jawLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "jawRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "jawOpen" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthClose" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthFunnel" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthPucker" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthSmileLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthSmileRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthFrownLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthFrownRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthDimpleLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthDimpleRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthStretchLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthStretchRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthRollLower" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthRollUpper" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthShrugLower" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthShrugUpper" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthPressLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthPressRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthLowerDownLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthLowerDownRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthUpperUpLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "mouthUpperUpRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "browDownLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "browDownRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "browInnerUp" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "browOuterUpLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "browOuterUpRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "cheekPuff" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "cheekSquintLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "cheekSquintRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "noseSneerLeft" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "noseSneerRight" -parent $faceMappingName $bsNode;
+        addAttr -dt "string" -longName "tongueOut" -parent $faceMappingName $bsNode;
+    }
+}
+
+proc createFaceMappingOnNode( string $targetNode ) {
+    string $connections[] = `listHistory -bf $targetNode`;
+    string $bsNodes[] = `ls -type "blendShape" $connections`;
+
+    for ($bsNode in $bsNodes) {
+        // create face attributes for each BS node
+        _createFaceAttrs($bsNode);
+    }
+}
+
+createFaceMappingOnNode($bsHostNode);

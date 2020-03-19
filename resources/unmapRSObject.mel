@@ -1,0 +1,17 @@
+int $bSelectedOnly = SELECTED_ONLY;
+string $rkk_allTransforms[];
+
+if($bSelectedOnly) {
+    $rkk_allTransforms = `ls -sl -tr`;
+} else {
+    $rkk_allTransforms = `ls -tr`;
+}
+
+for($tr in $rkk_allTransforms) {
+    if(`attributeExists "MAPPING_FIELD_NAME" $tr`) {
+        string $rsId = getAttr ($tr + ".MAPPING_FIELD_NAME");
+        if($rsId == "RS_ID_TAG") {
+            deleteAttr ($tr + ".MAPPING_FIELD_NAME");
+        }
+    }
+}

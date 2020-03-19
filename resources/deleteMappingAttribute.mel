@@ -1,0 +1,3 @@
+if (`attributeExists "MAPPING_FIELD_NAME" "MAYA_OBJECT_NAME"`) {
+    deleteAttr "MAYA_OBJECT_NAME.MAPPING_FIELD_NAME";
+}

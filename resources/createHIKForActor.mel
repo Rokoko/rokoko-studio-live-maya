@@ -1,0 +1,35 @@
+if (!`pluginInfo -q -l "mayaHIK"`) { loadPlugin "mayaHIK"; }
+if (!`pluginInfo -q -l "mayaCharacterization"`) { loadPlugin "mayaCharacterization"; }
+if (!`pluginInfo -q -l "OneClick"`) { loadPlugin "OneClick"; }
+
+// ensure hik plugins are loaded
+
+hikCreateCharacterControlsDockableWindow;
+
+proc string rkk_createHikActor() {
+    string $sceneChars[] = hikGetSceneCharacters();
+
+    if(!stringArrayContains("ACTOR_ID", $sceneChars)) {
+        // create hik skeleton and definition
+        hikCreateSkeleton();
+        // rename
+        string $currentCharacterName = hikGetCurrentCharacter();
+        //rename $currentCharacterName "ACTOR_ID";
+        //hikSetCurrentCharacter("ACTOR_ID");
+        //hikRenameConnectedNodes("ACTOR_ID", $currentCharacterName);
+        if ( hikIsCharacterizationToolUICmdPluginLoaded() )
+        {
+            hikUpdateCharacterList();
+            hikUpdateSourceList();
+            hikUpdateContextualUI();
+        }
+        // reduce spine count to 2
+        string $skelGenNode = hikGetSkeletonGeneratorNode($currentCharacterName);
+        setAttr ($skelGenNode + ".SpineCount") 2;
+        hikUpdateSkeletonFromSkeletonGeneratorNode($currentCharacterName, 1.0);
+        hikRebuildBoneAssignments($currentCharacterName);
+        return "1";
+    }
+    return "0";
+}
+rkk_createHikActor();

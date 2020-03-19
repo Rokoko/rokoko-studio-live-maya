@@ -1,0 +1,11 @@
+string $rkk_selectedTransforms[] = `ls -tr`;
+
+select -cl;
+for($tr in $rkk_selectedTransforms) {
+    if(`attributeExists "MAPPING_FIELD_NAME" $tr`) {
+        string $rsId = getAttr ($tr + ".MAPPING_FIELD_NAME");
+        if($rsId == "RS_ID_TAG") {
+            select -add $tr;
+        }
+    }
+}
