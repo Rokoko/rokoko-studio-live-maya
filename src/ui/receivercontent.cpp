@@ -60,7 +60,7 @@ ReceiverContent::ReceiverContent(QWidget* parent) : QWidget(parent)
     sceneScaleBox->setAlignment(Qt::AlignCenter);
     sceneScaleBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
     sceneScaleBox->setRange(-100000, 100000);
-    connect(sceneScaleBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double value) {
+    connect(sceneScaleBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [](double value) {
         Animations::get()->setSceneScale(value);
     });
     sceneScaleBox->setValue(100.0);
@@ -340,7 +340,6 @@ void ReceiverContent::populateTree()
             faceItem->setIcon(0, QIcon(":/resources/icon-row-face-32.png"));
             faceItem->setData(0, Qt::UserRole, QVariant(faceId));
             faceItem->setData(1, Qt::UserRole, QVariant((int)RSObjectType::FACE));
-            assert(faceItem != nullptr);
         }
 
         // populate trackers
@@ -352,7 +351,6 @@ void ReceiverContent::populateTree()
                 parentItem = propsItemMap[propParentId];
             else if(actorsMap.contains(propParentId))
                 parentItem = actorsMap[propParentId];
-            assert(parentItem != nullptr);
 
             QTreeWidgetItem* trackerItem = new QTreeWidgetItem(parentItem);
             QString trackerId = tracker["name"].toString();
