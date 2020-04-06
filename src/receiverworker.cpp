@@ -10,7 +10,7 @@ DataReceivingWorker::DataReceivingWorker(QObject* parent)
     socket = new QUdpSocket(this);
 
     connect(socket, &QUdpSocket::connected, this, &DataReceivingWorker::onSocketConnected);
-    connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &DataReceivingWorker::onSocketError);
+    connect(socket, static_cast<void (QAbstractSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error), this, &DataReceivingWorker::onSocketError);
 
     connect(&hearbeat, &QTimer::timeout, this, &DataReceivingWorker::onHearBeat);
     hearbeat.setInterval(1000 / RECEIVER_FPS);
@@ -55,7 +55,7 @@ void DataReceivingWorker::parseData(QJsonObject data)
     QJsonArray faceArray = data["faces"].toArray();
     foreach(auto face, faceArray) {
         QJsonObject faceObject = face.toObject();
-        facesMap[face["faceId"].toString()] = faceObject;
+        facesMap[faceObject["faceId"].toString()] = faceObject;
     }
     Animations::get()->putFaces(facesMap);
 

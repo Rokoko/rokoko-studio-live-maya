@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 #include <QString>
+#include <QHash>
 #include <maya/MObject.h>
 #include <maya/MVector.h>
 #include <maya/MQuaternion.h>

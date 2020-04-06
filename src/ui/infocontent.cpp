@@ -53,7 +53,6 @@ InfoContent::InfoContent(QWidget* parent) : QWidget(parent)
     // docs
     QPushButton* docsBtn = new QPushButton("Documentation", this);
     connect(docsBtn, &QPushButton::clicked, [](){
-        Utils::mayaPrintMessage("Open docs");
         QDesktopServices::openUrl(QUrl("https://rokoko.freshdesk.com/support/solutions/folders/47000766113"));
     });
     mainLayout->addWidget(docsBtn);
