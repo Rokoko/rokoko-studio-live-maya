@@ -1,4 +1,4 @@
-# Rokoko Studio Live for Maya
+# Rokoko Studio Live Plugin for Maya
 
 This plugin lets you stream animation data from Rokoko Studio into Maya.
 
