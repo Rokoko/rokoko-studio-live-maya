@@ -3,6 +3,8 @@
 #include "animations.h"
 #include <QFile>
 #include <QJsonArray>
+#include "lz4frame.h"
+
 
 DataReceivingWorker::DataReceivingWorker(QObject* parent)
     : QObject(parent)
@@ -102,6 +104,15 @@ void DataReceivingWorker::readAndApplyData() {
     QByteArray datagram;
     datagram.resize(socket->pendingDatagramSize());
     socket->readDatagram(datagram.data(), datagram.size());
+
+    const char* msgData = datagram.data();
+    printf("===========\n");
+    printf("%s", msgData);
+    printf("===========\n");
+
+    if(!mDecompressionContext)
+        LZ4F_createDecompressionContext(&mDecompressionContext, LZ4F_VERSION);
+
 
     QJsonDocument doc = QJsonDocument::fromJson(datagram.data());
 

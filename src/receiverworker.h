@@ -8,6 +8,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTimer>
+#include "lz4frame.h"
 
 
 class DataReceivingWorker : public QObject
@@ -30,6 +31,8 @@ private:
     void readAndApplyData();
     QTimer hearbeat;
     void onHearBeat();
+
+    LZ4F_decompressionContext_t mDecompressionContext = nullptr;
 };
 
 #endif // RECEIVERWORKER_H
