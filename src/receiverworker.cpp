@@ -96,31 +96,82 @@ void DataReceivingWorker::readAndApplyData() {
         return;
     }
 
-    if(socket->pendingDatagramSize() == -1) {
+    const qint64 pendingSize = socket->pendingDatagramSize();
+
+    if(pendingSize <= 0)
+    {
         emit workerStateChanged("Receiving no data!");
+        pause();
         return;
     }
 
     QByteArray datagram;
-    datagram.resize(socket->pendingDatagramSize());
-    socket->readDatagram(datagram.data(), datagram.size());
 
-    const char* msgData = datagram.data();
-    printf("===========\n");
-    printf("%s", msgData);
-    printf("===========\n");
+    datagram.resize(pendingSize);
+    const qint64 datagramReadLen = socket->readDatagram(datagram.data(), datagram.size());
 
-    if(!mDecompressionContext)
-        LZ4F_createDecompressionContext(&mDecompressionContext, LZ4F_VERSION);
+    // detect protocol version
+    float protocolVersionNumber = -1.0;
+    if(const char* versionKw = strstr(datagram.data(), "version"))
+    {
+        const char* version2Num = strstr(versionKw, "2");
+        const char* version25Num = strstr(versionKw, "2.5");
+        const char* delim = strstr(versionKw, ",");
+        if(version2Num && delim && version2Num < delim)
+        {
+            protocolVersionNumber = version25Num == nullptr ? 2.0 : 2.5;
+        }
+    } else {
+        protocolVersionNumber = 3.0;
+    }
 
+    QJsonObject frameData;
+    if(protocolVersionNumber == 2.0)
+    {
+        QJsonDocument doc = QJsonDocument::fromJson(datagram.data());
+        frameData = doc.object();
+    } else if(protocolVersionNumber == 3.0)
+    {
+        // decompress json3 and build frame data json object
+        constexpr int bufferSize{ 8192 * 32 };
+        if (!mDecompressionBuffer)
+            mDecompressionBuffer = new char[bufferSize];
 
-    QJsonDocument doc = QJsonDocument::fromJson(datagram.data());
+        if (!mDecompressionContext)
+            LZ4F_createDecompressionContext(&mDecompressionContext, LZ4F_VERSION);
 
-    QJsonObject frameData = doc.object();
+        LZ4F_resetDecompressionContext(mDecompressionContext);
+        size_t srcLen = static_cast<size_t>(datagramReadLen);
+        size_t dstLen = static_cast<size_t>(bufferSize);
+        size_t status = LZ4F_decompress(mDecompressionContext, mDecompressionBuffer, &dstLen, datagram.data(), &srcLen, nullptr);
+        if (status > 0)
+        {
+            emit workerStateChanged("JSON v3 data malformed!");
+            return;
+        } else {
+            if (const char* keyword = strstr(mDecompressionBuffer, "version"))
+            {
+                const char* version3Num = strstr(keyword, "3,");
+                if(version3Num != nullptr)
+                {
+                    // cut garbage from end
+                    for (size_t i = dstLen; i > 0; --i)
+                    {
+                        if (mDecompressionBuffer[i] == '}')
+                            break;
+                        mDecompressionBuffer[i] = '\0';
+                    }
+                    // init frameData from decompressed string
+                    printf("%s\n\n", mDecompressionBuffer);
+                }
+            }
+        }
 
-    int protocolVersion = frameData["version"].toInt();
-    if(protocolVersion != 2) {
-        emit workerStateChanged("Not valid data format! Use JSON v2!");
+    }
+
+    if(protocolVersionNumber < 0)
+    {
+        emit workerStateChanged("Not valid data format! Use JSON v2 or v3!");
         pause();
         return;
     }

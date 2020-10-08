@@ -33,6 +33,7 @@ private:
     void onHearBeat();
 
     LZ4F_decompressionContext_t mDecompressionContext = nullptr;
+    char* mDecompressionBuffer = nullptr;
 };
 
 #endif // RECEIVERWORKER_H
