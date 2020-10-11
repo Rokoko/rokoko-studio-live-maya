@@ -4,6 +4,8 @@
 #include <QFile>
 #include <QJsonArray>
 #include "lz4frame.h"
+#include "jsonv2parser.h"
+#include "jsonv3parser.h"
 
 
 DataReceivingWorker::DataReceivingWorker(QObject* parent)
@@ -14,62 +16,37 @@ DataReceivingWorker::DataReceivingWorker(QObject* parent)
     connect(socket, &QUdpSocket::connected, this, &DataReceivingWorker::onSocketConnected);
     connect(socket, static_cast<void (QAbstractSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error), this, &DataReceivingWorker::onSocketError);
 
-    connect(&hearbeat, &QTimer::timeout, this, &DataReceivingWorker::onHearBeat);
+    connect(&hearbeat, &QTimer::timeout, this, &DataReceivingWorker::onHeartBeat);
     hearbeat.setInterval(1000 / RECEIVER_FPS);
     hearbeat.start();
 }
 
 DataReceivingWorker::~DataReceivingWorker()
 {
-
+    if(parserImpl != nullptr)
+    {
+        delete parserImpl;
+        parserImpl = nullptr;
+    }
 }
 
-void DataReceivingWorker::pause() {
+void DataReceivingWorker::pause()
+{
     socket->abort();
 }
 
-void DataReceivingWorker::parseData(QJsonObject data)
+const std::vector<FPropSnapshot> DataReceivingWorker::getPropSnapshots()
 {
-    // put timestamps
-    Animations::get()->timestamp = data["timestamp"].toDouble();
-    Animations::get()->playbackTimestamp = data["playbackTimestamp"].toDouble();
+    if(parserImpl != nullptr)
+        return parserImpl->propSnapshots();
+    return {};
+}
 
-    // parse props
-    QJsonArray propsArray = data["props"].toArray();
-    QHash<QString, QJsonObject> propsMap;
-    foreach(const QJsonValue& value, propsArray) {
-        QJsonObject prop = value.toObject();
-        propsMap[prop["id"].toString()] = prop;
-    }
-    Animations::get()->putProps(propsMap);
-
-    // parse trackers
-    QHash<QString, QJsonObject> trackersMap;
-    QJsonArray trackersArray = data["trackers"].toArray();
-    foreach(const QJsonValue& value, trackersArray) {
-        QJsonObject tracker = value.toObject();
-        trackersMap[tracker["name"].toString()] = tracker;
-    }
-    Animations::get()->putTrackers(trackersMap);
-
-    // put faces
-    QHash<QString, QJsonObject> facesMap;
-    QJsonArray faceArray = data["faces"].toArray();
-    foreach(auto face, faceArray) {
-        QJsonObject faceObject = face.toObject();
-        facesMap[faceObject["faceId"].toString()] = faceObject;
-    }
-    Animations::get()->putFaces(facesMap);
-
-    // parse actors
-    QHash<QString, QJsonObject> actorsMap;
-    QJsonArray actorsArray = data["actors"].toArray();
-    foreach(const QJsonValue& value, actorsArray) {
-        QJsonObject actor = value.toObject();
-        actorsMap[actor["id"].toString()] = actor;
-    }
-    Animations::get()->putActors(actorsMap);
-
+const std::vector<FActorSnapshot> DataReceivingWorker::actorSnapshots()
+{
+    if(parserImpl != nullptr)
+        return parserImpl->actorSnapshots();
+    return {};
 }
 
 void DataReceivingWorker::onSocketError(QAbstractSocket::SocketError err)
@@ -84,40 +61,38 @@ void DataReceivingWorker::start(int port) {
     if(!socket->bind(QHostAddress::LocalHost, port, QAbstractSocket::ReuseAddressHint)){
         emit workerStateChanged("Not connected!");
     } else {
-        // TODO: fetch maya objects with mapping attribute
         emit onSocketConnected();
     }
 }
 
-void DataReceivingWorker::readAndApplyData() {
-
+void DataReceivingWorker::readAndApplyData()
+{
     if(socket->state() != QAbstractSocket::SocketState::BoundState) {
         emit workerStateChanged("Socket not connected!");
         return;
     }
 
+    // 1. read datagram and prepare source bytes array
     const qint64 pendingSize = socket->pendingDatagramSize();
-
     if(pendingSize <= 0)
     {
         emit workerStateChanged("Receiving no data!");
         pause();
         return;
     }
-
     QByteArray datagram;
-
     datagram.resize(pendingSize);
     const qint64 datagramReadLen = socket->readDatagram(datagram.data(), datagram.size());
 
-    // detect protocol version
+
+
+    // 2. detect protocol version
     float protocolVersionNumber = -1.0;
     if(const char* versionKw = strstr(datagram.data(), "version"))
     {
-        const char* version2Num = strstr(versionKw, "2");
-        const char* version25Num = strstr(versionKw, "2.5");
-        const char* delim = strstr(versionKw, ",");
-        if(version2Num && delim && version2Num < delim)
+        const char* version2Num = strstr(versionKw, "2,");
+        const char* version25Num = strstr(versionKw, "2.5,");
+        if(version2Num || version25Num)
         {
             protocolVersionNumber = version25Num == nullptr ? 2.0 : 2.5;
         }
@@ -125,71 +100,47 @@ void DataReceivingWorker::readAndApplyData() {
         protocolVersionNumber = 3.0;
     }
 
-    QJsonObject frameData;
-    if(protocolVersionNumber == 2.0)
-    {
-        QJsonDocument doc = QJsonDocument::fromJson(datagram.data());
-        frameData = doc.object();
-    } else if(protocolVersionNumber == 3.0)
-    {
-        // decompress json3 and build frame data json object
-        constexpr int bufferSize{ 8192 * 32 };
-        if (!mDecompressionBuffer)
-            mDecompressionBuffer = new char[bufferSize];
+    const bool versionIsValid = protocolVersionNumber > 0;
 
-        if (!mDecompressionContext)
-            LZ4F_createDecompressionContext(&mDecompressionContext, LZ4F_VERSION);
 
-        LZ4F_resetDecompressionContext(mDecompressionContext);
-        size_t srcLen = static_cast<size_t>(datagramReadLen);
-        size_t dstLen = static_cast<size_t>(bufferSize);
-        size_t status = LZ4F_decompress(mDecompressionContext, mDecompressionBuffer, &dstLen, datagram.data(), &srcLen, nullptr);
-        if (status > 0)
+
+    // 3. Pick implementation
+    if (versionIsValid)
+    {
+        if(protocolVersionNumber != mLastProtocolVersion)
         {
-            emit workerStateChanged("JSON v3 data malformed!");
-            return;
-        } else {
-            if (const char* keyword = strstr(mDecompressionBuffer, "version"))
+            // change implemention when version changes
+            if(parserImpl != nullptr)
             {
-                const char* version3Num = strstr(keyword, "3,");
-                if(version3Num != nullptr)
-                {
-                    // cut garbage from end
-                    for (size_t i = dstLen; i > 0; --i)
-                    {
-                        if (mDecompressionBuffer[i] == '}')
-                            break;
-                        mDecompressionBuffer[i] = '\0';
-                    }
-                    // init frameData from decompressed string
-                    printf("%s\n\n", mDecompressionBuffer);
-                }
+                delete parserImpl;
+                parserImpl = nullptr;
+            }
+
+            if(protocolVersionNumber == 2.0)
+            {
+                printf("Pick JsonV2 parser! Versions: %f - %f\n", mLastProtocolVersion, protocolVersionNumber);
+                parserImpl = new JsonV2Parser();
+            } else if(protocolVersionNumber == 3.0)
+            {
+                printf("Pick JsonV3 parser!\n");
+                parserImpl = new JsonV3Parser();
             }
         }
 
+        mLastProtocolVersion = protocolVersionNumber;
     }
 
-    if(protocolVersionNumber < 0)
+    // 4. Feed received bytes to implementation
+    if(parserImpl && versionIsValid)
     {
-        emit workerStateChanged("Not valid data format! Use JSON v2 or v3!");
-        pause();
-        return;
+        emit workerStateChanged("Working");
+        parserImpl->feed(datagram, datagramReadLen);
+        parserImpl->parse();
+        parserImpl->apply();
     }
-
-    // TODO: emit only on change
-    emit workerStateChanged("Working");
-
-    // 1 pass: parse json into Animatins storage
-    parseData(frameData);
-
-    // 2 pass: mapping is dynamyc and user can map/unmap objects at orbitrary moment
-
-    // 3 pass: apply data to currently mapped objects
-    Animations::get()->applyAnimationsToMappedObjects();
-
 }
 
-void DataReceivingWorker::onHearBeat()
+void DataReceivingWorker::onHeartBeat()
 {
     readAndApplyData();
 }

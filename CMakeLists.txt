@@ -24,6 +24,7 @@ set(PROJECT_NAME rslm)
 set(LIBRARY_DIRS $ENV{MAYA_LOCATION}/lib)
 
 set(HEADERS
+    src/interfaces.h
     src/singleton.h
     src/utils.h
     src/recorder.h
@@ -44,10 +45,14 @@ set(HEADERS
     thirdparty/lz4/lz4frame.h
     thirdparty/lz4/lz4frame_static.h
     thirdparty/lz4/xxhash.h
+    src/jsonv2parser.h
+    src/jsonv3parser.h
+    src/framework.h
 )
 
 # set SOURCE_FILES
 set(SOURCE_FILES ${HEADERS}
+    src/framework.cpp
     src/animations.cpp
     src/main.cpp
     src/mapping.cpp
@@ -62,6 +67,8 @@ set(SOURCE_FILES ${HEADERS}
     src/ui/recordbutton.cpp
     src/ui/rootwidget.cpp
     src/ui/updatercontent.cpp
+    src/jsonv2parser.cpp
+    src/jsonv3parser.cpp
     thirdparty/lz4/lz4.c
     thirdparty/lz4/lz4hc.c
     thirdparty/lz4/xxhash.c
