@@ -8,111 +8,6 @@
 #include <map>
 
 
-enum class EBodyJoints : uint8_t
-{
-    ROOT,
-    HIP,
-    STOMACH,
-    CHEST,
-    NECK,
-    HEAD,
-    LEFT_SHOULDER,
-    LEFT_ARM,
-    LEFT_FOREARM,
-    LEFT_HAND,
-    RIGHT_SHOULDER,
-    RIGHT_ARM,
-    RIGHT_FOREARM,
-    RIGHT_HAND,
-    LEFT_UP_LEG,
-    LEFT_LEG,
-    LEFT_FOOT,
-    RIGHT_UP_LEG,
-    RIGHT_LEG,
-    RIGHT_FOOT,
-    COUNT
-};
-
-enum class EFingerJoints : uint8_t
-{
-    PROXIMAL,
-    MEDIAL,
-    DISTAL,
-    //TIP,
-    COUNT
-};
-
-enum class EHandFingers : uint8_t
-{
-    THUMB,
-    INDEX,
-    MIDDLE,
-    RING,
-    LITTLE,
-    COUNT
-};
-
-enum class EFaceShapes : uint8_t
-{
-    EYEBLINKLEFT,
-    EYELOOKDOWNLEFT,
-    EYELOOKINLEFT,
-    EYELOOKOUTLEFT,
-    EYELOOKUPLEFT,
-    EYESQUINTLEFT,
-    EYEWIDELEFT,
-    EYEBLINKRIGHT,
-    EYELOOKDOWNRIGHT,
-    EYELOOKINRIGHT,
-    EYELOOKOUTRIGHT,
-    EYELOOKUPRIGHT,
-    EYESQUINTRIGHT,
-    EYEWIDERIGHT,
-    JAWFORWARD,
-    JAWLEFT,
-    JAWRIGHT,
-    JAWOPEN,
-    MOUTHCLOSE,
-    MOUTHFUNNEL,
-    MOUTHPUCKER,
-    MOUTHLEFT,
-    MOUTHRIGHT,
-    MOUTHSMILELEFT,
-    MOUTHSMILERIGHT,
-    MOUTHFROWNLEFT,
-    MOUTHFROWNRIGHT,
-    MOUTHDIMPLELEFT,
-    MOUTHDIMPLERIGHT,
-    MOUTHSTRETCHLEFT,
-    MOUTHSTRETCHRIGHT,
-    MOUTHROLLLOWER,
-    MOUTHROLLUPPER,
-    MOUTHSHRUGLOWER,
-    MOUTHSHRUGUPPER,
-    MOUTHPRESSLEFT,
-    MOUTHPRESSRIGHT,
-    MOUTHLOWERDOWNLEFT,
-    MOUTHLOWERDOWNRIGHT,
-    MOUTHUPPERUPLEFT,
-    MOUTHUPPERUPRIGHT,
-    BROWDOWNLEFT,
-    BROWDOWNRIGHT,
-    BROWINNERUP,
-    BROWOUTERUPLEFT,
-    BROWOUTERUPRIGHT,
-    CHEEKPUFF,
-    CHEEKSQUINTLEFT,
-    CHEEKSQUINTRIGHT,
-    NOSESNEERLEFT,
-    NOSESNEERRIGHT,
-    TONGUEOUT,
-    COUNT
-};
-
-
-
-
-
 struct FActorMeta
 {
     bool hasGloves = false;
@@ -172,6 +67,7 @@ struct FFaceSnapshot
     QString faceId = "";
     QString profileName = "";
     std::map<QString, float> shapes;
+    QString parentActorId = "";
 };
 
 
