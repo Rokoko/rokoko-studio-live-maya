@@ -104,6 +104,14 @@ void JsonV3Parser::parse()
         QJsonObject actorMeta = actor["meta"].toObject();
         FActorSnapshot actorSnapshot;
 
+        actorSnapshot.meta = {
+            actorMeta["hasGlooves"].toBool(),
+            actorMeta["hasLeftGlove"].toBool(),
+            actorMeta["hasRightGlove"].toBool(),
+            actorMeta["hasBody"].toBool(),
+            actorMeta["hasFace"].toBool()
+        };
+
         if(actorMeta["hasBody"].toBool() || actorMeta["hasGloves"].toBool())
         {
             // put body

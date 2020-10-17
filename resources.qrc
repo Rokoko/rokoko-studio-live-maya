@@ -25,5 +25,7 @@
         <file>resources/deleteMappingAttribute.mel</file>
         <file>resources/createFaceAttributes.mel</file>
         <file>resources/fetchBlendShapes.mel</file>
+        <file>resources/icon-glove-32.png</file>
+        <file>resources/icon-glove-r-32.png</file>
     </qresource>
 </RCC>

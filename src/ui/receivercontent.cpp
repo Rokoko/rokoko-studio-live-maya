@@ -332,6 +332,17 @@ void ReceiverContent::populateTree()
             actorItem->setData(0, Qt::UserRole, QVariant(actor.name));
             actorItem->setData(1, Qt::UserRole, QVariant((int)RSObjectType::ACTOR));
 
+            if(actor.meta.hasLeftGlove)
+            {
+                QTreeWidgetItem* leftGlooveItem = new QTreeWidgetItem(profileItem);
+                leftGlooveItem->setIcon(0, QIcon(":/resources/icon-glove-32.png"));
+            }
+            if(actor.meta.hasRightGlove)
+            {
+                QTreeWidgetItem* rightGlooveItem = new QTreeWidgetItem(profileItem);
+                rightGlooveItem->setIcon(0, QIcon(":/resources/icon-glove-r-32.png"));
+            }
+
             actorsMap[actor.name] = actorItem;
         }
 
