@@ -48,7 +48,7 @@ void JsonV3Parser::feed(QByteArray &datagram, qint64 readLen)
         printf("Json parse error %s\n", err.errorString().toStdString().c_str());
     }
 
-    // printf("\n\n%s\n\n", mDecompressionBuffer);
+//     printf("\n\n%s\n\n", mDecompressionBuffer);
 
     if(mDecompressionBuffer != nullptr)
     {
@@ -75,15 +75,18 @@ void JsonV3Parser::parse()
         QJsonObject prop = value.toObject();
         FPropSnapshot propSnapshot;
         propSnapshot.name = prop["name"].toString();
+        propSnapshot.id = prop["name"].toString();
 
         auto propColor = prop["color"].toArray();
         propSnapshot.color = QColor(propColor[0].toDouble(), propColor[1].toDouble(), propColor[2].toDouble());
 
-        auto propPostiion = prop["position"].toArray();
-        propSnapshot.position = QVector3D(propPostiion[0].toDouble(), propPostiion[1].toDouble(), propPostiion[2].toDouble());
+        propSnapshot.type = prop["type"].toInt();
 
-        auto propRotation = prop["rotation"].toArray();
-        propSnapshot.rotation = QQuaternion(propRotation[0].toDouble(), propRotation[1].toDouble(), propRotation[2].toDouble(), propRotation[3].toDouble());
+        auto propPostiion = prop["position"].toObject();
+        propSnapshot.position = QVector3D(propPostiion["x"].toDouble(), propPostiion["y"].toDouble(), propPostiion["z"].toDouble());
+
+        auto propRotation = prop["rotation"].toObject();
+        propSnapshot.rotation = QQuaternion(propRotation["w"].toDouble(), propRotation["x"].toDouble(), propRotation["y"].toDouble(), propRotation["z"].toDouble());
 
         propsMap[prop["name"].toString()] = propSnapshot;
     }
@@ -101,7 +104,7 @@ void JsonV3Parser::parse()
         QJsonObject actorMeta = actor["meta"].toObject();
         FActorSnapshot actorSnapshot;
 
-        if(actorMeta["hasBody"].toBool())
+        if(actorMeta["hasBody"].toBool() || actorMeta["hasGloves"].toBool())
         {
             // put body
             actorSnapshot.name = actor["name"].toString();
@@ -170,26 +173,8 @@ std::vector<FPropSnapshot> JsonV3Parser::propSnapshots()
 {
     std::vector<FPropSnapshot> result;
 
-    QJsonObject sceneObject = mMessageJson["scene"].toObject();
-
-    foreach(auto prop, sceneObject["props"].toArray())
-    {
-        QJsonObject propObject = prop.toObject();
-
-        FPropSnapshot snapshot;
-        snapshot.name = propObject["name"].toString();
-        auto color = propObject["color"].toArray();
-        snapshot.color = QColor::fromRgbF(color[0].toDouble(), color[1].toDouble(), color[2].toDouble());
-        snapshot.type = propObject["type"].toInt();
-
-        auto position = propObject["position"].toArray();
-        snapshot.position = QVector3D(position[0].toDouble(), position[1].toDouble(), position[2].toDouble());
-
-        auto rotation = propObject["rotation"].toArray();
-        snapshot.rotation = QQuaternion(rotation[0].toDouble(), rotation[1].toDouble(), rotation[2].toDouble(), rotation[3].toDouble());
-
-        result.push_back(snapshot);
-    }
+    QList<FPropSnapshot> ls = Animations::get()->getProps().values();
+    std::copy(ls.begin(), ls.end(), std::back_inserter(result));
 
     return result;
 }
