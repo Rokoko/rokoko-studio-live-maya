@@ -8,20 +8,22 @@
 #include <QJsonObject>
 
 #include <maya/MDagPath.h>
+#include "framework.h"
+
 
 
 class _Animations
 {
 public:
     _Animations();
-    void putProps(const QHash<QString, QJsonObject>&);
-    QHash<QString, QJsonObject> &getProps();
-    void putTrackers(const QHash<QString, QJsonObject>&);
-    QHash<QString, QJsonObject> &getTrackers();
-    void putActors(const QHash<QString, QJsonObject>&);
-    QHash<QString, QJsonObject> &getActors();
-    void putFaces(const QHash<QString, QJsonObject>&);
-    QHash<QString, QJsonObject> &getFaces();
+    void putProps(const QHash<QString, FPropSnapshot>&);
+    QHash<QString, FPropSnapshot> &getProps();
+    void putTrackers(const QHash<QString, FTrackerSnapshot>&);
+    QHash<QString, FTrackerSnapshot> &getTrackers();
+    void putActors(const QHash<QString, FActorSnapshot>&);
+    QHash<QString, FActorSnapshot> &getActors();
+    void putFaces(const QHash<QString, FFaceSnapshot>&);
+    QHash<QString, FFaceSnapshot> &getFaces();
 
     void applyAnimationsToMappedObjects();
 
@@ -36,16 +38,17 @@ public:
     void reset();
 private:
     float _sceneScale = 1.0;
-    // prop id - json
-    QHash<QString, QJsonObject> propsMap;
-    // tracker name - json
-    QHash<QString, QJsonObject> trackersMap;
-    // actor id - json
-    QHash<QString, QJsonObject> actorsMap;
-    // faceId - json
-    QHash<QString, QJsonObject> facesMap;
+    // prop id - snapshot
+    QHash<QString, FPropSnapshot> propsMap;
+    // tracker name - snapshot
+    QHash<QString, FTrackerSnapshot> trackersMap;
+    // actor id - snapshot
+    QHash<QString, FActorSnapshot> actorsMap;
+    // faceId - snapshot
+    QHash<QString, FFaceSnapshot> facesMap;
 
-    void animatePropOrTracker(QJsonObject obj, const MDagPath &dagPath);
+    void animatePropOrTracker(FPropSnapshot obj, const MDagPath &dagPath);
+    void animatePropOrTracker(FTrackerSnapshot obj, const MDagPath &dagPath);
 
     bool recordingEnabled = false;
     std::function<void()> stopReceiverCallback = [](){};

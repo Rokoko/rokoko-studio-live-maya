@@ -39,8 +39,7 @@ InfoContent::InfoContent(QWidget* parent) : QWidget(parent)
     // license
     QPushButton* licenseBtn = new QPushButton("License", this);
     connect(licenseBtn, &QPushButton::clicked, [](){
-        Utils::mayaPrintMessage("Open LICENSE.md");
-
+        QDesktopServices::openUrl(QUrl("https://github.com/RokokoElectronics/rokoko-studio-live-maya/blob/master/LICENSE.md"));
     });
     licenseWebsiteLayout->addWidget(licenseBtn);
 
@@ -54,14 +53,14 @@ InfoContent::InfoContent(QWidget* parent) : QWidget(parent)
     // docs
     QPushButton* docsBtn = new QPushButton("Documentation", this);
     connect(docsBtn, &QPushButton::clicked, [](){
-        Utils::mayaPrintMessage("Open docs");
+        QDesktopServices::openUrl(QUrl("https://rokoko.freshdesk.com/support/solutions/folders/47000766113"));
     });
     mainLayout->addWidget(docsBtn);
 
     // forums
     QPushButton* fodumsBtn = new QPushButton("Join our forums", this);
     connect(fodumsBtn, &QPushButton::clicked, [](){
-        Utils::mayaPrintMessage("Open forums");
+        QDesktopServices::openUrl(QUrl("https://rokoko.freshdesk.com/support/discussions/forums/47000400064"));
     });
     mainLayout->addWidget(fodumsBtn);
 

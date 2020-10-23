@@ -5,6 +5,20 @@
 
 
 struct ButtonParams {
+    ButtonParams(QString _checkedIconPath="",
+                  QString _uncheckedIconPath="",
+                  QString _uncheckedStateText="...",
+                  QString _checkedStateText="",
+                  Qt::Alignment _iconAlignment=Qt::AlignLeft,
+                  unsigned int _iconSize=16)
+        :
+          checkedIconPath(_checkedIconPath),
+          uncheckedIconPath(_uncheckedIconPath),
+          uncheckedStateText(_uncheckedStateText),
+          checkedStateText(_checkedStateText),
+          iconAlignment(_iconAlignment),
+          iconSize(_iconSize) { }
+
     QString checkedIconPath="";
     QString uncheckedIconPath="";
     QString uncheckedStateText="...";
