@@ -278,6 +278,14 @@ void ReceiverContent::prepareContextMenu(const QPoint &pos)
 
         menu.exec(treeWidget->mapToGlobal(pos));
     }
+    else
+    {
+        QMenu menu(this);
+        menu.addAction("Update tree", [this]() {
+            populateTree();
+        });
+        menu.exec(treeWidget->mapToGlobal(pos));
+    }
 
 }
 
@@ -291,26 +299,29 @@ void ReceiverContent::populateTree()
     QTimer::singleShot(250, [&](){
         // populate props
         treeWidget->clear();
-        auto props = Animations::get()->getProps();
+        auto props = worker->getPropSnapshots();
         QHash<QString, QTreeWidgetItem*> propsItemMap;
-        foreach(auto prop, props) {
+        foreach(FPropSnapshot prop, props)
+        {
             QTreeWidgetItem* propItem = new QTreeWidgetItem(treeWidget);
-            propItem->setText(0, prop["name"].toString());
+            propItem->setText(0, prop.name);
             propItem->setIcon(0, QIcon(":/resources/cube.png"));
-            // put rs object id into user data, to e used by context menu
-            propItem->setData(0, Qt::UserRole, QVariant(prop["id"].toString()));
+            // put rs object id into user data, to be used by context menu
+            propItem->setData(0, Qt::UserRole, QVariant(prop.id));
             propItem->setData(1, Qt::UserRole, QVariant((int)RSObjectType::PROP));
-            propsItemMap[prop["id"].toString()] = propItem;
+            propsItemMap[prop.id] = propItem;
         }
 
         // actor profiles
         QHash<QString, QTreeWidgetItem*> profilesMap;
         QHash<QString, QTreeWidgetItem*> actorsMap;
-        auto actors = Animations::get()->getActors();
-        foreach(auto actor, actors) {
+
+        auto actors = worker->actorSnapshots();
+        foreach(auto actor, actors)
+        {
             QTreeWidgetItem* profileItem = new QTreeWidgetItem(treeWidget);
-            QString profileName = actor["profileName"].toString();
-            QString actorName = actor["name"].toString();
+            QString profileName = actor.profileName;
+            QString actorName = actor.name;
             profileItem->setText(0, profileName);
             profileItem->setIcon(0, QIcon(":/resources/icon-rokoko-32.png"));
             profilesMap[profileName] = profileItem;
@@ -318,42 +329,53 @@ void ReceiverContent::populateTree()
             actorItem->setText(0, actorName);
             actorItem->setIcon(0, QIcon(":/resources/icon-row-suit-32.png"));
             // put rs object id into user data, to e used by context menu
-            actorItem->setData(0, Qt::UserRole, QVariant(actor["id"].toString()));
+            actorItem->setData(0, Qt::UserRole, QVariant(actor.name));
             actorItem->setData(1, Qt::UserRole, QVariant((int)RSObjectType::ACTOR));
 
-            actorsMap[actor["id"].toString()] = actorItem;
+            if(actor.meta.hasLeftGlove)
+            {
+                QTreeWidgetItem* leftGlooveItem = new QTreeWidgetItem(profileItem);
+                leftGlooveItem->setIcon(0, QIcon(":/resources/icon-glove-32.png"));
+            }
+            if(actor.meta.hasRightGlove)
+            {
+                QTreeWidgetItem* rightGlooveItem = new QTreeWidgetItem(profileItem);
+                rightGlooveItem->setIcon(0, QIcon(":/resources/icon-glove-r-32.png"));
+            }
+
+            actorsMap[actor.name] = actorItem;
         }
 
         // populate faces
         auto faces = Animations::get()->getFaces();
-        foreach(auto face, faces) {
+        foreach(auto face, faces)
+        {
             QTreeWidgetItem* faceItem = nullptr;
-            if(face.contains("profileName")) {
-                QString faceProfileName = face["profileName"].toString();
+            if(face.profileName != "")
+            {
+                QString faceProfileName = face.profileName;
                 if(profilesMap.contains(faceProfileName))
                     faceItem = new QTreeWidgetItem(profilesMap[faceProfileName]);
             } else
                 faceItem = new QTreeWidgetItem(treeWidget);
 
-            QString faceId = face["faceId"].toString();
-            faceItem->setText(0, faceId);
+            faceItem->setText(0, face.faceId);
             faceItem->setIcon(0, QIcon(":/resources/icon-row-face-32.png"));
-            faceItem->setData(0, Qt::UserRole, QVariant(faceId));
+            faceItem->setData(0, Qt::UserRole, QVariant(face.faceId));
             faceItem->setData(1, Qt::UserRole, QVariant((int)RSObjectType::FACE));
         }
 
         // populate trackers
         auto trackers = Animations::get()->getTrackers();
         foreach(auto tracker, trackers) {
-            QString propParentId = tracker["connectionId"].toString();
             QTreeWidgetItem* parentItem = nullptr;
-            if(propsItemMap.contains(propParentId))
-                parentItem = propsItemMap[propParentId];
-            else if(actorsMap.contains(propParentId))
-                parentItem = actorsMap[propParentId];
+            if(propsItemMap.contains(tracker.connectionId))
+                parentItem = propsItemMap[tracker.connectionId];
+            else if(actorsMap.contains(tracker.connectionId))
+                parentItem = actorsMap[tracker.connectionId];
 
             QTreeWidgetItem* trackerItem = new QTreeWidgetItem(parentItem);
-            QString trackerId = tracker["name"].toString();
+            QString trackerId = tracker.name;
             trackerItem->setText(0, trackerId);
             trackerItem->setIcon(0, QIcon(":/resources/icon-vp-32.png"));
             trackerItem->setData(0, Qt::UserRole, QVariant(trackerId));

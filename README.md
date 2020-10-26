@@ -36,7 +36,8 @@ Plugin's UI consists of 3 collapsible categories.
 # Usage
 
 First of all, make sure Rokoko Studio is running and live streaming **Custom** option is enabled.
-Select `JSON v2` as data format and `UDP` as protocol. Leave `Port` and `Forward IP` values by default.
+Select `JSON v2` or `JSON v3` as data format and `UDP` as protocol. Leave `Port` and `Forward IP` values by default.
+Alternatively you can just enable **Maya** option.
 ![enableStreaming](images/customStreaming.png)
 
 Than go to Maya and hit `Start Receiver` button.

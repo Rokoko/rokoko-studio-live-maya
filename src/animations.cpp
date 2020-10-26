@@ -26,42 +26,42 @@ _Animations::_Animations()
 
 }
 
-void _Animations::putProps(const QHash<QString, QJsonObject> &props)
+void _Animations::putProps(const QHash<QString, FPropSnapshot> &props)
 {
     propsMap = props;
 }
 
-QHash<QString, QJsonObject> &_Animations::getProps()
+QHash<QString, FPropSnapshot> &_Animations::getProps()
 {
     return propsMap;
 }
 
-void _Animations::putTrackers(const QHash<QString, QJsonObject> &trackers)
+void _Animations::putTrackers(const QHash<QString, FTrackerSnapshot> &trackers)
 {
     trackersMap = trackers;
 }
 
-QHash<QString, QJsonObject> &_Animations::getTrackers()
+QHash<QString, FTrackerSnapshot> &_Animations::getTrackers()
 {
     return trackersMap;
 }
 
-void _Animations::putActors(const QHash<QString, QJsonObject> &actors)
+void _Animations::putActors(const QHash<QString, FActorSnapshot> &actors)
 {
     actorsMap = actors;
 }
 
-QHash<QString, QJsonObject> &_Animations::getActors()
+QHash<QString, FActorSnapshot> &_Animations::getActors()
 {
     return actorsMap;
 }
 
-void _Animations::putFaces(const QHash<QString, QJsonObject> &faces)
+void _Animations::putFaces(const QHash<QString, FFaceSnapshot> &faces)
 {
     facesMap = faces;
 }
 
-QHash<QString, QJsonObject> &_Animations::getFaces()
+QHash<QString, FFaceSnapshot> &_Animations::getFaces()
 {
     return facesMap;
 }
@@ -77,7 +77,8 @@ void _Animations::applyAnimationsToMappedObjects()
     for(const QString &rsId : allIds) {
         auto it = objectMapping.find(rsId);
         // std::cout << "cnt: " << objectMapping.count(rsId) << std::endl;
-        if(it != objectMapping.end()) {
+        if(it != objectMapping.end())
+        {
             while(it != objectMapping.end())
             {
                 MString objectPathString = it.value();
@@ -102,19 +103,19 @@ void _Animations::applyAnimationsToMappedObjects()
                 if(propsMap.contains(rsId)) {
                     // apply props animations
 
-                    QJsonObject propObject = propsMap[rsId];
+                    FPropSnapshot propObject = propsMap[rsId];
                     animatePropOrTracker(propObject, dagPath);
                     // printf("prop animated %s - %s\n", dagPath.partialPathName().asChar(), rsId.toStdString().c_str());
 
                 } else if(trackersMap.contains(rsId)) {
 
                     // apply trackers animations
-                    QJsonObject trackerObject = trackersMap[rsId];
+                    FTrackerSnapshot trackerObject = trackersMap[rsId];
                     animatePropOrTracker(trackerObject, dagPath);
 
                 } else if(actorsMap.contains(rsId)) {
                     // apply actor animations
-                    QJsonObject actorObject = actorsMap[rsId];
+                    FActorSnapshot actorObject = actorsMap[rsId];
 
                     // Hips joint mapped implicitly for user
                     // BFS starting from Hips and apply data to each joints
@@ -148,9 +149,8 @@ void _Animations::applyAnimationsToMappedObjects()
                         // find rs bone based on joint name
                         if(mayaToRsBoneNames.contains(mayaBoneName)) {
                             QString rsBoneName = mayaToRsBoneNames[mayaBoneName];
-                            QJsonObject rsBoneObject = actorObject[rsBoneName].toObject();
-                            QJsonObject rsBonePosObject = rsBoneObject["position"].toObject();
-                            QJsonObject rsBoneQuatObject = rsBoneObject["rotation"].toObject();
+                            QVector3D rsBonePos = actorObject.body[rsBoneName].position;
+                            QQuaternion rsBoneQuat = actorObject.body[rsBoneName].rotation;
 
                             MQuaternion studioTposeRot = MQuaternion::identity;
                             if(studioTPose.contains(rsBoneName))
@@ -160,16 +160,16 @@ void _Animations::applyAnimationsToMappedObjects()
                             }
 
                             // convert rs transform to maya transform
-                            MVector boneLocation = Utils::rsToMaya(MVector(rsBonePosObject["x"].toDouble(),
-                                                                           rsBonePosObject["y"].toDouble(),
-                                                                           rsBonePosObject["z"].toDouble()) * sceneScale());
+                            MVector boneLocation = Utils::rsToMaya(MVector(rsBonePos.x(),
+                                                                           rsBonePos.y(),
+                                                                           rsBonePos.z()) * sceneScale());
                             boneLocation = boneLocation.rotateBy(referenceQuat);
                             boneLocation += referenceOffset;
                             // convert studio rotation into maya space
-                            MQuaternion boneQuat = Utils::rsToMaya(MQuaternion(rsBoneQuatObject["x"].toDouble(),
-                                                                   rsBoneQuatObject["y"].toDouble(),
-                                                                   rsBoneQuatObject["z"].toDouble(),
-                                                                   rsBoneQuatObject["w"].toDouble()));
+                            MQuaternion boneQuat = Utils::rsToMaya(MQuaternion(rsBoneQuat.x(),
+                                                                   rsBoneQuat.y(),
+                                                                   rsBoneQuat.z(),
+                                                                   rsBoneQuat.scalar()));
 
                             MFnIkJoint fnTr(jointPath);
                             fnTr.setTranslation(boneLocation, MSpace::kWorld);
@@ -215,7 +215,6 @@ void _Animations::applyAnimationsToMappedObjects()
     }
 
     QStringList faceIds = faceObjectMapping.keys();
-    printf("Num face objects: %d\n", faceObjectMapping.values().count());
     for(QString &rsId : faceIds) {
         auto faceIt = faceObjectMapping.find(rsId);
         if(faceIt != faceObjectMapping.end()) {
@@ -234,7 +233,7 @@ void _Animations::applyAnimationsToMappedObjects()
 
                     const QStringList faceShapeNames = Mapping::get()->getFaceShapeNames();
                     // get input data for this face
-                    QJsonObject faceObject = facesMap[rsId];
+                    FFaceSnapshot faceObject = facesMap[rsId];
 
                     // access mapped blendshape node
                     MFnBlendShapeDeformer faceFn(object);
@@ -246,7 +245,7 @@ void _Animations::applyAnimationsToMappedObjects()
 
                     // for each studio shape name set weight value
                     for(QString studioShapeName : faceShapeNames) {
-                        double weight = faceObject[studioShapeName].toDouble() * 0.01;
+                        double weight = faceObject.shapes[studioShapeName] * 0.01;
 
                         MString bsFieldName = BLEND_SHAPE_PREFIX + studioShapeName.toStdString().c_str();
                         MStatus fieldPlugStatus;
@@ -299,23 +298,16 @@ void _Animations::reset()
     facesMap.clear();
 }
 
-void _Animations::animatePropOrTracker(QJsonObject obj, const MDagPath &dagPath)
+void _Animations::animatePropOrTracker(FPropSnapshot obj, const MDagPath &dagPath)
 {
-//    bool isLive = obj["isLive"].toBool();
+    MVector rsPosition(obj.position.x(),
+                       obj.position.y(),
+                       obj.position.z());
 
-     // do nothing if not live
-//    if(!isLive) return;
-
-    QJsonObject postitionObject = obj["position"].toObject();
-    QJsonObject rotationObject = obj["rotation"].toObject();
-    MVector rsPosition(postitionObject["x"].toDouble(),
-                       postitionObject["y"].toDouble(),
-                       postitionObject["z"].toDouble());
-
-    MQuaternion rsRotation(rotationObject["x"].toDouble(),
-                           rotationObject["y"].toDouble(),
-                           rotationObject["z"].toDouble(),
-                           rotationObject["w"].toDouble());
+    MQuaternion rsRotation(obj.rotation.x(),
+                           obj.rotation.y(),
+                           obj.rotation.z(),
+                           obj.rotation.scalar());
 
     // convert RS transform to Maya transform
     MVector mayaPosition = Utils::rsToMaya(rsPosition) * Animations::get()->sceneScale();
@@ -340,6 +332,14 @@ void _Animations::animatePropOrTracker(QJsonObject obj, const MDagPath &dagPath)
             Recorder::get()->keyframeNumericAttribute("rz", frame, dagPath, euAngle.z);
         });
     }
+}
+
+void _Animations::animatePropOrTracker(FTrackerSnapshot obj, const MDagPath &dagPath)
+{
+    FPropSnapshot pSnapshot;
+    pSnapshot.position = obj.position;
+    pSnapshot.rotation = obj.rotation;
+    animatePropOrTracker(pSnapshot, dagPath);
 }
 
 

@@ -39,7 +39,7 @@ _Mapping::_Mapping()
     boneMapping["LeftForeArm"] = "leftLowerArm";
     boneMapping["LeftHand"] = "leftHand";
 
-    /*boneMapping["LeftHandThumb1"] = "leftThumbProximal";
+    boneMapping["LeftHandThumb1"] = "leftThumbProximal";
     boneMapping["LeftHandThumb2"] = "leftThumbMedial";
     boneMapping["LeftHandThumb3"] = "leftThumbDistal";
     boneMapping["LeftHandThumb4"] = "leftThumbTip";
@@ -62,8 +62,7 @@ _Mapping::_Mapping()
     boneMapping["LeftHandPinky1"] = "leftLittleProximal";
     boneMapping["LeftHandPinky2"] = "leftLittleMedial";
     boneMapping["LeftHandPinky3"] = "leftLittleDistal";
-    boneMapping["LeftHandPinky4"] = "leftLittleTip";*/
-
+    boneMapping["LeftHandPinky4"] = "leftLittleTip";
 
     // right hand
     boneMapping["RightShoulder"] = "rightShoulder";
@@ -71,7 +70,7 @@ _Mapping::_Mapping()
     boneMapping["RightForeArm"] = "rightLowerArm";
     boneMapping["RightHand"] = "rightHand";
 
-    /*boneMapping["RightHandThumb1"] = "rightThumbProximal";
+    boneMapping["RightHandThumb1"] = "rightThumbProximal";
     boneMapping["RightHandThumb2"] = "rightThumbMedial";
     boneMapping["RightHandThumb3"] = "rightThumbDistal";
     boneMapping["RightHandThumb4"] = "rightThumbTip";
@@ -94,7 +93,7 @@ _Mapping::_Mapping()
     boneMapping["RightHandPinky1"] = "rightLittleProximal";
     boneMapping["RightHandPinky2"] = "rightLittleMedial";
     boneMapping["RightHandPinky3"] = "rightLittleDistal";
-    boneMapping["RightHandPinky4"] = "rightLittleTip";*/
+    boneMapping["RightHandPinky4"] = "rightLittleTip";
 
     // left leg
     boneMapping["LeftUpLeg"] = "leftUpLeg";
@@ -137,6 +136,24 @@ _Mapping::_Mapping()
     studioTPose["rightLeg"] = MQuaternion(-0.000, -0.707, -0.000, 0.707);
     studioTPose["rightFoot"] = MQuaternion(-0.000, 0.707, -0.707, 0.000);
     studioTPose["rightToe"] = MQuaternion(0.000, 0.707, -0.707, 0.000);
+
+    studioTPose["leftThumbProximal"] = MQuaternion(-0.560, -0.701, 0.430, -0.090);
+    studioTPose["leftThumbMedial"] = MQuaternion(-0.653, -0.653, 0.270, -0.270);
+    studioTPose["leftThumbDistal"] = MQuaternion(-0.653, -0.653, 0.270, -0.2706);
+    studioTPose["leftThumbTip"] = MQuaternion(-0.653, -0.653, 0.270, -0.270);
+    studioTPose["leftIndexProximal"] = MQuaternion(-0.500, -0.500, 0.500, -0.500);
+    studioTPose["leftMiddleProximal"] = MQuaternion(-0.500, -0.500, 0.500, -0.500);
+    studioTPose["leftRingProximal"] = MQuaternion(-0.500, -0.500, 0.500, -0.500);
+    studioTPose["leftLittleProximal"] = MQuaternion(-0.500, -0.500, 0.500, -0.500);
+
+    studioTPose["rightThumbProximal"] = MQuaternion(0.560, -0.700, 0.500, 0.000);
+    studioTPose["rightThumbMedial"] = MQuaternion(0.653, -0.653, 0.270, 0.270);
+    studioTPose["rightThumbDistal"] = MQuaternion(0.653, -0.653, 0.270, 0.270);
+    studioTPose["rightThumbTip"] = MQuaternion(0.653, -0.653, 0.270, 0.270);
+    studioTPose["rightIndexProximal"] = MQuaternion(0.500, -0.500, 0.500, 0.500);
+    studioTPose["rightMiddleProximal"] = MQuaternion(0.500, -0.500, 0.500, 0.500);
+    studioTPose["rightRingProximal"] = MQuaternion(0.500, -0.500, 0.500, 0.500);
+    studioTPose["rightLittleProximal"] = MQuaternion(0.500, -0.500, 0.500, 0.500);
 
     installCallbacks();
 
