@@ -1,6 +1,6 @@
 <h1 align="center">Rokoko Studio Live Plugin for Maya</h1>
 
-[Rokoko Studio](https://www.rokoko.com/en/products/studio) is a powerful and intuitive software for recording, visualizing and exporting motion capture.
+[Rokoko Studio](https://www.rokoko.com/studio) is a powerful and intuitive software for recording, visualizing and exporting motion capture.
 
 This plugin let's you stream animation data from Rokoko Studio into Maya to preview and work with all your motion capture data easily and intuitively.
 
