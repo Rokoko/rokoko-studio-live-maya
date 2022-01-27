@@ -58,7 +58,7 @@ Select `JSON v2` or `JSON v3` as data format and `UDP` as protocol. Leave `Port`
 Alternatively you can just enable **Maya** option.
 ![enableStreaming](images/customStreaming.png)
 
-Than go to Maya and hit `Start Receiver` button.
+Then go to Maya and hit `Start Receiver` button.
 You will see received objects below in a tree structure that resembles scene overview in Studio.
 ![startReceiver](images/startReceiver.png)
 
