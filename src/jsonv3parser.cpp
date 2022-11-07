@@ -156,6 +156,9 @@ void JsonV3Parser::parse()
             faceSnapshot.profileName = actorSnapshot.profileName;
             faceSnapshot.parentActorId = actorSnapshot.id;
 
+            if (faceSnapshot.faceId.isEmpty())
+                faceSnapshot.faceId = actor["name"].toString();
+            
             const QStringList studioShapeNames = Mapping::get()->getFaceShapeNames();
             foreach(QString key, faceObject.keys())
             {
