@@ -8,7 +8,7 @@ This plugin let's you stream animation data from Rokoko Studio into Maya to prev
 
 ## Requirements
 - Maya 2020 or higher
-- Rokoko Studio 1.18.0b
+- Rokoko Studio or Rokoko Studio Legacy (1.18.0b or higher)
 
 ## Features
 - Live stream data:
