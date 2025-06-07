@@ -144,7 +144,7 @@ void _Animations::applyAnimationsToMappedObjects()
 
                         QString jointPathString(jointPath.fullPathName().asChar());
                         // this name contains character name CHARNAME_BONENAME
-                        QString jointName = jointPathString.split("|", QString::SkipEmptyParts).takeLast();
+                        QString jointName = jointPathString.split("|", Qt::SkipEmptyParts).takeLast();
                         QString mayaBoneName = jointName.split("_").takeLast();
                         // find rs bone based on joint name
                         if(mayaToRsBoneNames.contains(mayaBoneName)) {

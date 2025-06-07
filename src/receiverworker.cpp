@@ -14,7 +14,7 @@ DataReceivingWorker::DataReceivingWorker(QObject* parent)
     socket = new QUdpSocket(this);
 
     connect(socket, &QUdpSocket::connected, this, &DataReceivingWorker::onSocketConnected);
-    connect(socket, static_cast<void (QAbstractSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error), this, &DataReceivingWorker::onSocketError);
+    connect(socket, static_cast<void (QAbstractSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::errorOccurred), this, &DataReceivingWorker::onSocketError);
 
     connect(&hearbeat, &QTimer::timeout, this, &DataReceivingWorker::onHeartBeat);
     hearbeat.setInterval(1000 / RECEIVER_FPS);
@@ -58,7 +58,7 @@ void DataReceivingWorker::onSocketError(QAbstractSocket::SocketError err)
 }
 
 void DataReceivingWorker::start(int port) {
-    if(!socket->bind(QHostAddress::LocalHost, port, QAbstractSocket::ReuseAddressHint)){
+    if(!socket->bind(port, QAbstractSocket::ReuseAddressHint)){
         emit workerStateChanged("Not connected!");
     } else {
         emit onSocketConnected();
@@ -77,7 +77,6 @@ void DataReceivingWorker::readAndApplyData()
     if(pendingSize <= 0)
     {
         emit workerStateChanged("Receiving no data!");
-        pause();
         return;
     }
     QByteArray datagram;

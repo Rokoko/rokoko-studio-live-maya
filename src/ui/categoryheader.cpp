@@ -1,5 +1,6 @@
 #include "categoryheader.h"
 #include <QPainter>
+#include <QTransform>
 
 CategoryHeader::CategoryHeader(QWidget *parent, QString title)
     : QPushButton(parent)
@@ -19,7 +20,8 @@ void CategoryHeader::paintEvent(QPaintEvent *e)
 
     QPainter painter(this);
     QImage img(":/resources/arrow.svg");
-    QMatrix m;
+    
+    QTransform m;
     m.rotate(bCollapsed ? -90 : 0);
     painter.drawImage(0, 0, img.transformed(m));
 }

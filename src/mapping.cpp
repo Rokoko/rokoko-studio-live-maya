@@ -4,7 +4,7 @@
 
 #include <QFile>
 #include <QTimer>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include <maya/MFn.h>
 #include <maya/MGlobal.h>
@@ -605,7 +605,7 @@ void _Mapping::automapWeights(QString rsId)
 
     // printf("Automap face\n");
     auto compareFaceWeightNames = [](QString studioName, QString foreignName) -> bool {
-        QRegExp exp("[^A-Za-z]");
+        QRegularExpression exp("[^A-Za-z]");
         QString strippedForeignName = foreignName.remove(exp);
         return strippedForeignName.toLower().contains(studioName.toLower());
     };
