@@ -359,9 +359,11 @@ void ReceiverContent::populateTree()
             } else
                 faceItem = new QTreeWidgetItem(treeWidget);
 
-            faceItem->setText(0, face.faceId);
+            const QString faceName = face.faceId.isEmpty() ? "face" : face.faceId;
+
+            faceItem->setText(0, faceName);
             faceItem->setIcon(0, QIcon(":/resources/icon-row-face-32.png"));
-            faceItem->setData(0, Qt::UserRole, QVariant(face.faceId));
+            faceItem->setData(0, Qt::UserRole, QVariant(faceName));
             faceItem->setData(1, Qt::UserRole, QVariant((int)RSObjectType::FACE));
         }
 

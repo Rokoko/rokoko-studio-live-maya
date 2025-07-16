@@ -45,7 +45,8 @@ void RecordButton::paintEvent(QPaintEvent *event)
         QString text = QString("%1 - %2").arg(startTime).arg(startTime + recordedFrames);
         QFontMetrics m(recordedFramesFont);
         painter.setFont(recordedFramesFont);
-        int textWidth = m.width(text);
+        
+        const int textWidth = m.horizontalAdvance(text);
         QPoint p = rect().bottomRight() - QPoint(textWidth * 1.5, m.height() / 2);
         painter.drawText(p, text);
     }

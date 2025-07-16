@@ -193,7 +193,7 @@ std::vector<FPropSnapshot> JsonV3Parser::propSnapshots()
 std::vector<FActorSnapshot> JsonV3Parser::actorSnapshots()
 {
     std::vector<FActorSnapshot> result;
-    for (auto snapshot : Animations::get()->getActors().values().toStdList())
+    for (auto snapshot : Animations::get()->getActors().values().toVector())
         result.push_back(snapshot);
     return result;
 }

@@ -7,7 +7,7 @@
 #include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QRegExpValidator>
+#include <QRegularExpression>
 #include <QSpinBox>
 #include <QNetworkReply>
 #include <QJsonDocument>
@@ -26,11 +26,13 @@ CommandApiContent::CommandApiContent(QWidget* parent)
     ipLineEdit = new QLineEdit("127.0.0.1", this);
     ipLineEdit->setAlignment(Qt::AlignCenter);
     QString oIpRange = "(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])";
-    QRegExp oIpRegex ("^" + oIpRange
-                      + "\\." + oIpRange
-                      + "\\." + oIpRange
-                      + "\\." + oIpRange + "$");
-    QRegExpValidator* ipValidator = new QRegExpValidator(oIpRegex, ipLineEdit);
+    
+    QRegularExpression oIpRegex("^" + oIpRange
+        + "\\." + oIpRange
+        + "\\." + oIpRange
+        + "\\." + oIpRange + "$");
+    QRegularExpressionValidator* ipValidator = new QRegularExpressionValidator(oIpRegex, ipLineEdit);
+
     ipLineEdit->setValidator(ipValidator);
     formLayout->addRow("Address:", ipLineEdit);
 
